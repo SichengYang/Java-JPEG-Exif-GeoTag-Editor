@@ -1,0 +1,4 @@
+How to use it: 
+  javac Test.java
+  java Test
+This program will read the exif and report the associate GPS data.
