@@ -12,8 +12,12 @@ public class JpegExif {
 	private static final int RATIONAL_SIZE = 8;
 	private static final int[] DATA_SIZE = {1, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
 	
-	public JpegExif(byte[] exif) throws IOException
+	public JpegExif(BufferedInputStream f) throws IOException
 	{
+		//get exif data
+		Jpeg jpeg = new Jpeg(f);
+		byte[] exif = jpeg.exif;
+		
 		position = 0;
 		
 		//read endian info
@@ -52,7 +56,8 @@ public class JpegExif {
 				break;
 			}
 			//if not reading ifd1, which is the last IFD. we will sign a new offset to next IFD.
-			if(i != 3) position = ifd_offset[i];
+			if(i != 3 && ifd_offset[i] != 0) position = ifd_offset[i];
+			else throw new IOException("Unable to find GPS information or this image does not contain GPS information");
 		}
 	}
 	
