@@ -12,17 +12,13 @@ public class Test
 		BufferedInputStream f = new BufferedInputStream(new FileInputStream (photo));
 		try 
 		{
-			JpegExif exif = new JpegExif(f);
-			Entry[] gps = exif.getGpsIfd();
-			if (gps != null)
-				for(int i=0; i<gps.length; i++)
-					System.out.println(gps[i]);
-			else System.out.println("GPS info not found");
+			new JpegExif(f);
 		}
 		catch(Exception e)
 		{
 			System.out.println(e.getMessage());
 		}
+		System.out.println("Finish Reading");
 		f.close();
 		input.close();
 	}

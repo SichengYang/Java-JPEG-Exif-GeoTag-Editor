@@ -46,19 +46,32 @@ public class JpegExif {
 		position += (4 + (int)first_ifd_offset);
 		
 		//read each IFD and find GPS IFD. 
-		for(int i=1; i<4; i++)
+		System.out.println("IFD0: ");
+		read_ifd(exif);
+		
+		System.out.println("sub IFD: ");
+		if( ifd_offset[1]!= 0 ) 
 		{
+			position = ifd_offset[1];
 			read_ifd(exif);
-			if(ifd_offset[0] != 0)
-			{
-				position = ifd_offset[0];
-				gps_entry = read_ifd(exif);
-				break;
-			}
-			//if not reading ifd1, which is the last IFD. we will sign a new offset to next IFD.
-			if(i != 3 && ifd_offset[i] != 0) position = ifd_offset[i];
-			else throw new IOException("Unable to find GPS information or this image does not contain GPS information");
 		}
+		else throw new IOException("Unable to find GPS data");
+		
+		System.out.println("IFD1: ");
+		if( ifd_offset[2]!= 0 )
+		{
+			position = ifd_offset[2];
+			read_ifd(exif);
+		}
+		else throw new IOException("Unable to find GPS data");
+		
+		System.out.println("GPS data:");
+		if(ifd_offset[0] != 0)
+		{
+			position = ifd_offset[0];
+			gps_entry = read_ifd(exif);
+		} else 
+			throw new IOException("Unable to find GPS data");
 	}
 	
 	//Return: a collection of Entry which is gps IFD
@@ -120,6 +133,7 @@ public class JpegExif {
 			//set value
 			Object value = getValue(offset, entry_collection[i].getDataFormat(), entry_collection[i].getComponentCount(), exif);
 			entry_collection[i].setValue(value);
+			System.out.println(entry_collection[i]);
 			
 			//set endian
 			entry_collection[i].setEndian(bigEndian);
