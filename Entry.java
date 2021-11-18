@@ -114,7 +114,7 @@ public class Entry
 						  " component count: " + componentCount + 
 						  " offset value: " + (bigEndian ? BigEndian.getLong32(offset) : SmallEndian.getLong32(offset)) );
 		//check whether it is latitude and longitude and provide different print String.
-		if((tagNumber[0] & 0xFF) == 0x00 && ((tagNumber[1] & 0xFF) == 0x02 || (tagNumber[1] & 0xFF) == 0x04))
+		if(dataFormat == 5 && value.getClass().isArray())
 		{
 			double[] cast_value = (double[])value;
 			result += " value: ";
