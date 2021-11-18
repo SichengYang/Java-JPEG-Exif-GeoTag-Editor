@@ -13,6 +13,3 @@ tag number: 00 08 data format: 2 component count: 3 offset value: 808845312 valu
 tag number: 00 10 data format: 2 component count: 2 offset value: 0 value: 
 tag number: 00 12 data format: 2 component count: 10 offset value: 1677983744 value: WGS-84   
 tag number: 00 1d data format: 2 component count: 11 offset value: 1845755904 value: 2008:10:23
-
-Error message if GPS info not found:
-Unable to find GPS data
