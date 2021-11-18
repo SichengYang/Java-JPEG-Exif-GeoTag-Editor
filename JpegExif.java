@@ -221,7 +221,7 @@ public class JpegExif {
 			case 6: //signed byte
 				return (char)value[3];
 			case 7: //undefined
-				return new String(value);
+				return "unknown data";
 			case 8: //signed short
 				return bigEndian ? 
 					   BigEndian.getSignedShort(value[2], value[3]) : 
