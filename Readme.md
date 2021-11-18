@@ -1,8 +1,8 @@
-Java JPG/JPEG Geotag Reader
+#Java JPG/JPEG Geotag Reader
   This program can scan the exif data in a JPEG or JPG and report the associate data.
   This program is lisenced under Creative Commons Zero v1.0 Universal.
   
-Sample Output: 
+#Sample Output: 
 tag number: 00 01 data format: 2 component count: 2 offset value: 1308622848 value: N
 tag number: 00 02 data format: 5 component count: 3 offset value: 470024192 value: 43.0 28.0 2.814 
 tag number: 00 03 data format: 2 component count: 2 offset value: 1157627904 value: E
