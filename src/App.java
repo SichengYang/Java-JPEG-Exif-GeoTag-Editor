@@ -11,10 +11,9 @@ public class App
 		System.out.print("File name:");
 		String filename = input.next();
 		File photo = new File(filename);
-		BufferedInputStream f = new BufferedInputStream(new FileInputStream (photo));
 		try 
 		{
-			JpegExif exif = new JpegExif(f);
+			JpegExif exif = new JpegExif(photo);
 			
 			Entry[] ifd0 = exif.getIfd0();
 			System.out.println("IFD0:");
@@ -44,7 +43,6 @@ public class App
 		{
 			System.out.println(e.getMessage());
 		}
-		f.close();
 		input.close();
 	}
 }

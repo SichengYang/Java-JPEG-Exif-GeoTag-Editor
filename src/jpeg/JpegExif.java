@@ -19,14 +19,15 @@ public class JpegExif {
 	private static final int RATIONAL_SIZE = 8;
 	private static final int[] DATA_SIZE = {1, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
 	
-	public JpegExif(BufferedInputStream f) throws IOException
+	public JpegExif(File f) throws IOException
 	{
+		BufferedInputStream buff = new BufferedInputStream(new FileInputStream (f));
 		//get exif data
-		Jpeg jpeg = new Jpeg(f);
+		Jpeg jpeg = new Jpeg(buff);
 		byte[] exif = jpeg.exif;
-		
+			
 		position = 0;
-		
+			
 		//read endian info
 		if( (char)exif[position] == 'M' && (char)exif[position+1] == 'M' )
 			bigEndian = true;
@@ -34,51 +35,48 @@ public class JpegExif {
 			bigEndian = false;
 		else throw new IOException("Error endian information");
 		position += 2;
-		
+			
 		//check tag mark
 		if (bigEndian)
 		{
 			if ( !( (exif[position] & 0xFF) == 0x00 && (exif[position+1] & 0xFF) == 0x2A ))
-				throw new IOException("Error on tag marker");
+					throw new IOException("Error on tag marker");
 		}
 		else if ( !( (exif[position] & 0xFF) == 0x2A && (exif[position+1] & 0xFF) == 0x00 ))
 			throw new IOException("Error on tag marker");
 		position += 2;
-		
+			
 		//calculate offset to first IFD
 		byte[] offset_data = new byte[4];
 		for( int i=0; i<4; i++ )
 			offset_data[i] = exif[position+i];
 		long first_ifd_offset = getLong32(offset_data) - HEADER_SIZE;
 		position += (4 + (int)first_ifd_offset);
-		
+			
 		//read each IFD and find GPS IFD. 
 		//read IFD0
 		ifd0 = read_ifd(exif);
-		
+			
 		//read sub IFD
 		if( ifd_offset[1]!= 0 ) 
 		{
 			position = ifd_offset[1];
 			sub_ifd = read_ifd(exif);
 		}
-		else throw new IOException("Unable to find GPS data");
-		
+
 		//read IFD 1
 		if( ifd_offset[2]!= 0 )
 		{
 			position = ifd_offset[2];
 			ifd1 = read_ifd(exif);
 		}
-		else throw new IOException("Unable to find GPS data");
-		
-		System.out.println("GPS data:");
+			
+		//read GPS IFD
 		if(ifd_offset[0] != 0)
 		{
 			position = ifd_offset[0];
 			gps_entry = read_ifd(exif);
-		} else 
-			throw new IOException("Unable to find GPS data");
+		}
 	}
 	
 	//Return: a collection of Entry which is gps IFD
@@ -173,6 +171,34 @@ public class JpegExif {
 		if (offset != 0) ifd_offset[2] = offset;
 		
 		return entry_collection;
+	}
+	
+	//print all tag in exif
+	public void print()
+	{
+		if(ifd0 != null){
+			System.out.println("IFD0:");
+			for(Entry e : ifd0)
+				System.out.println(e);
+		}
+			
+		if(sub_ifd != null){
+			System.out.println("sub IFD:");
+			for(Entry e : sub_ifd)
+				System.out.println(e);
+		}
+		
+		if(ifd1 != null){
+			System.out.println("IFD1:");
+			for(Entry e : ifd1)
+				System.out.println(e);
+		}
+		
+		if(gps_entry != null){
+			System.out.println("GPS data:");
+			for(Entry e : gps_entry)
+				System.out.println(e);
+		}
 	}
 	
 	//Analyze the entry to find the gps ifd

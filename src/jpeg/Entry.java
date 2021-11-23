@@ -5,6 +5,10 @@
 
 package jpeg;
 
+import java.lang.reflect.Array;
+import java.nio.ByteBuffer;
+import java.util.*;
+
 import endian.BigEndian;
 import endian.SmallEndian;
 
@@ -110,6 +114,72 @@ public class Entry
 	public boolean getEndian()
 	{
 		return bigEndian;
+	}
+	
+	//Return: true if both Entry contains same tag number and value; false otherwise.
+	public boolean equals(Object obj)
+	{
+		if( obj instanceof Entry ) {
+			Entry entry = (Entry) obj;
+			
+			//compare tagNumber
+			boolean sameTag = tagNumber[0] == entry.getTagNumber()[0] && tagNumber[1] == entry.getTagNumber()[1];
+			if(!sameTag)
+				return false;
+			
+			//compare data type
+			if(dataFormat != entry.getDataFormat())
+				return false;
+			
+			//compare value
+			switch(dataFormat)
+			{
+				case 1: //unsigned byte
+					return (byte)value == (byte)(entry.getValue());
+				case 2: //ASCII string
+					return ( (String)value ).equals( (String)(entry.getValue()) );
+				case 3: //unsigned short
+					return (int)value == (int)(entry.getValue());
+				case 4: //unsigned long
+					return (long)value == (long)(entry.getValue());
+				case 5: //unsigned rational
+					if(value.getClass().isArray() && entry.getValue().getClass().isArray()) {
+						double[] value1 = (double[]) value;
+						double[] value2 = (double[]) entry.getValue();
+						return value1.equals(value2);
+					} else {
+						double value1 = (double) value;
+						double value2 = (double) entry.getValue();
+						return value1 == value2;
+					}
+				case 6: //signed byte
+					return (char)value == (char)(entry.getValue());
+				case 7: //undefined
+					return (byte[])value == (byte[])(entry.getValue());
+				case 8: //signed short
+					return (short)value == (short)(entry.getValue());
+				case 9: //signed long
+					return (long)value == (long)(entry.getValue());
+				case 10: //signed rational
+					if(value.getClass().isArray() && entry.getValue().getClass().isArray()) {
+						double[] value1 = (double[]) value;
+						double[] value2 = (double[]) entry.getValue();
+						return value1.equals(value2);
+					} else {
+						double value1 = (double) value;
+						double value2 = (double) entry.getValue();
+						return value1 == value2;
+					}
+				case 11: //single float
+					return (float)value == (float)(entry.getValue());
+				case 12: //single double
+					return (double)value == (double)(entry.getValue());
+				default:
+					return false;
+			}
+		}
+		else
+			return false;
 	}
 	
 	//Return: a String that represent the Directory. Format: tag number: **, data format: **, componentCount: **, offset value: **, value: **
