@@ -5,9 +5,7 @@
 
 package jpeg;
 
-import java.lang.reflect.Array;
-import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Arrays;
 
 import endian.BigEndian;
 import endian.SmallEndian;
@@ -146,7 +144,7 @@ public class Entry
 					if(value.getClass().isArray() && entry.getValue().getClass().isArray()) {
 						double[] value1 = (double[]) value;
 						double[] value2 = (double[]) entry.getValue();
-						return value1.equals(value2);
+						return Arrays.equals(value1, value2);
 					} else {
 						double value1 = (double) value;
 						double value2 = (double) entry.getValue();
@@ -155,7 +153,7 @@ public class Entry
 				case 6: //signed byte
 					return (char)value == (char)(entry.getValue());
 				case 7: //undefined
-					return (byte[])value == (byte[])(entry.getValue());
+					return true;
 				case 8: //signed short
 					return (short)value == (short)(entry.getValue());
 				case 9: //signed long
@@ -164,7 +162,7 @@ public class Entry
 					if(value.getClass().isArray() && entry.getValue().getClass().isArray()) {
 						double[] value1 = (double[]) value;
 						double[] value2 = (double[]) entry.getValue();
-						return value1.equals(value2);
+						return Arrays.equals(value1, value2);
 					} else {
 						double value1 = (double) value;
 						double value2 = (double) entry.getValue();
