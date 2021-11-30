@@ -21,6 +21,10 @@ public class App
 		double latitude = 50.0 + 30.0 / 60 + 55.77 / 3600;
 		double longitude = 100.0 + 50.0 / 60 + 10.8 / 3600;
 		
+		File results = new File("./assets/results");
+		if(!results.exists())
+			results.mkdir();
+		
 		File photo = new File("./assets/internet.JPG");
 		File output = new File("./assets/results/editted-" + photo.getName());
 		Jpeg jpeg = new Jpeg(photo);
