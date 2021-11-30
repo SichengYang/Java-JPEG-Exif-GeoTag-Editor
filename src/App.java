@@ -21,24 +21,42 @@ public class App
 		double latitude = 50.0 + 30.0 / 60 + 55.77 / 3600;
 		double longitude = 100.0 + 50.0 / 60 + 10.8 / 3600;
 		
-		File results = new File("./assets/results");
-		if(!results.exists())
-			results.mkdir();
+		File remove_results = new File("./assets/remove");
+		if(!remove_results.exists())
+			remove_results.mkdir();
 		
-		File photo = new File("./assets/internet.JPG");
-		File output = new File("./assets/results/editted-" + photo.getName());
-		Jpeg jpeg = new Jpeg(photo);
-		JpegOutputSet outputSet = new JpegOutputSet(jpeg);
-		outputSet.removeGeoTag(output);
+		File update_results = new File("./assets/update");
+		if(!update_results.exists())
+			update_results.mkdir();
 		
-		photo = new File("./assets/results/editted-" + photo.getName());
-		jpeg = new Jpeg(photo);
-		jpeg.exif.print();
-		
-		photo = new File("./assets/iPhone-6.JPG");
-		output = new File("./assets/results/editted-" + photo.getName());
-		jpeg = new Jpeg(photo);
-		outputSet = new JpegOutputSet(jpeg);
-		outputSet.updateGeoTag(output, latitude, longitude);
+		File resource = new File("./assets");
+
+		for(File f : resource.listFiles()) {
+			if(f.isFile()) {
+				try {
+				File output = new File("./assets/remove/" + f.getName());
+				Jpeg jpeg = new Jpeg(f);
+				JpegOutputSet outputSet = new JpegOutputSet(jpeg);
+				if (outputSet.removeGeoTag(output))
+					System.out.println("Remove " + f.getName());
+				} catch (Exception e) {
+					System.out.println("Failed to remove " + f.getName());
+				}
+			}
+		}
+
+		for(File f : resource.listFiles()) {
+			if(f.isFile()) {
+				try {
+					File output = new File("./assets/update/" + f.getName());
+					Jpeg jpeg = new Jpeg(f);
+					JpegOutputSet outputSet = new JpegOutputSet(jpeg);
+					if (outputSet.updateGeoTag(output, latitude, longitude))
+						System.out.println("Update " + f.getName());
+				} catch (Exception e) {
+					System.out.println("Failed to update " + f.getName());
+				}
+			}
+		}
 	}
 }
