@@ -1,4 +1,4 @@
-# Java JPG/JPEG Geotag Editor:
+# Java JPG/JPEG Geotag Reader:
 ***
 This program can scan the exif data in a JPEG or JPG and report the associate data.
 

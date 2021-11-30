@@ -1,48 +1,40 @@
 import java.io.*;
 import java.util.*;
 import jpeg.JpegExif;
-import jpeg.Entry;
+import jpeg.JpegOutputSet;
+import jpeg.Jpeg;
 
 public class App
 {
 	public static void main(String[] args) throws FileNotFoundException, IOException
 	{
-		Scanner input = new Scanner (System.in);
-		System.out.print("File name:");
-		String filename = input.next();
-		File photo = new File(filename);
-		try 
-		{
-			JpegExif exif = new JpegExif(photo);
-			
-			Entry[] ifd0 = exif.getIfd0();
-			System.out.println("IFD0:");
-			for(Entry e : ifd0)
-				System.out.println(e);
-			ifd0 = null;
-			
-			Entry[] sub_ifd = exif.getSubIfd();
-			System.out.println("sub IFD:");
-			for(Entry e : sub_ifd)
-				System.out.println(e);
-			sub_ifd = null;
-			
-			Entry[] ifd1 = exif.getIfd1();
-			System.out.println("IFD1:");
-			for(Entry e : ifd1)
-				System.out.println(e);
-			ifd1 = null;
-			
-			Entry[] gps_ifd = exif.getGpsIfd();
-			System.out.println("GPS data:");
-			for(Entry e : gps_ifd)
-				System.out.println(e);
-			gps_ifd = null;
-		}
-		catch(Exception e)
-		{
-			System.out.println(e.getMessage());
-		}
-		input.close();
+		/*
+		File photo = new File("./assets/Cannon-EOS-M50-no-geotag.JPG");
+		Jpeg jpeg = new Jpeg(photo);
+		File output = new File("./assets/results/editted-" + photo.getName());
+		JpegOutputSet outputSet = new JpegOutputSet(jpeg);
+		double latitude = 50.0 + 30.0 / 60 + 55.77 / 3600;
+		double longitude = 100.0 + 50.0 / 60 + 10.8 / 3600;
+		outputSet.updateGeoTag(output, latitude, longitude);
+		*/
+		
+		double latitude = 50.0 + 30.0 / 60 + 55.77 / 3600;
+		double longitude = 100.0 + 50.0 / 60 + 10.8 / 3600;
+		
+		File photo = new File("./assets/internet.JPG");
+		File output = new File("./assets/results/editted-" + photo.getName());
+		Jpeg jpeg = new Jpeg(photo);
+		JpegOutputSet outputSet = new JpegOutputSet(jpeg);
+		outputSet.removeGeoTag(output);
+		
+		photo = new File("./assets/results/editted-" + photo.getName());
+		jpeg = new Jpeg(photo);
+		jpeg.exif.print();
+		
+		photo = new File("./assets/iPhone-6.JPG");
+		output = new File("./assets/results/editted-" + photo.getName());
+		jpeg = new Jpeg(photo);
+		outputSet = new JpegOutputSet(jpeg);
+		outputSet.updateGeoTag(output, latitude, longitude);
 	}
 }

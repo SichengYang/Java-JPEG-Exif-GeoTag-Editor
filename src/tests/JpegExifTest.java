@@ -2,6 +2,7 @@ package tests;
 
 import jpeg.*;
 import java.io.File;
+import java.util.LinkedList;
 
 public class JpegExifTest {
 	
@@ -10,7 +11,8 @@ public class JpegExifTest {
 		JpegExif exif = null;
 		
 		try {
-			exif = new JpegExif(new File("./assets/Internet.jpg"));
+			Jpeg jpeg = new Jpeg(new File("./assets/Internet.jpg"));
+			exif = jpeg.exif;
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			
@@ -21,7 +23,7 @@ public class JpegExifTest {
 			
 			//test get ifd0 function
 			System.out.println("IFD0:");
-			Entry[] ifd0 = exif.getIfd0();
+			LinkedList<Entry> ifd0 = exif.getIfd0();
 			if(ifd0 != null)
 				for(Entry e : ifd0)
 					System.out.println(e);
@@ -30,7 +32,7 @@ public class JpegExifTest {
 			
 			//test get sub_ifd function
 			System.out.println("sub IFD:");
-			Entry[] sub_ifd = exif.getSubIfd();
+			LinkedList<Entry> sub_ifd = exif.getSubIfd();
 			if(ifd0 != null)
 				for(Entry e : sub_ifd)
 					System.out.println(e);
@@ -39,7 +41,7 @@ public class JpegExifTest {
 			
 			//test get ifd1 function
 			System.out.println("IFD1:");
-			Entry[] ifd1 = exif.getIfd1();
+			LinkedList<Entry> ifd1 = exif.getIfd1();
 			if(ifd1 != null)
 				for(Entry e : ifd1)
 					System.out.println(e);
@@ -48,7 +50,7 @@ public class JpegExifTest {
 			
 			//Test get GPS functions
 			System.out.println("GPS data:");
-			Entry[] gps = exif.getGpsIfd();
+			LinkedList<Entry> gps = exif.getGpsIfd();
 			if(gps != null)
 				for(Entry e : gps)
 					System.out.println(e);
@@ -58,7 +60,8 @@ public class JpegExifTest {
 		
 		//test print function
 		try {
-			exif = new JpegExif(new File("./assets/iPhone12-no-geotag.jpg"));
+			Jpeg jpeg = new Jpeg(new File("./assets/iPhone12-no-geotag.jpg"));
+			exif = jpeg.exif;
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}

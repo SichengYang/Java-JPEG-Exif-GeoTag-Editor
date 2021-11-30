@@ -2,6 +2,8 @@ package jpeg;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.*;
+
 import endian.BigEndian;
 import endian.SmallEndian;
 
@@ -9,25 +11,34 @@ public class JpegExif {
 	
 	private boolean bigEndian;
 	private int position;
-	private int[] ifd_offset = {0,0,0}; //0: GPS IFD offset, 1: sub IFD offset, 2: IFD1 offset
-	private Entry[] gps_entry;
-	private Entry[] ifd0;
-	private Entry[] sub_ifd;
-	private Entry[] ifd1;
+	
+	private int gps_offset = 0;
+	private int sub_offset = 0;
+	private int ifd1_offset = 0;
+	private int thumbnail_format = 0;
+	private int thumbnail_offset = 0;
+	private int thumbnail_length = 0;
+	private int image_width = 0;
+	private int image_height = 0;
+	
+	private LinkedList<Entry> gps_entry;
+	private LinkedList<Entry> ifd0;
+	private LinkedList<Entry> sub_ifd;
+	private LinkedList<Entry> ifd1;
+	private Thumbnail thumbnail;
 	
 	private static final int HEADER_SIZE = 8;
 	private static final int RATIONAL_SIZE = 8;
+	private static final int SHORT_SIZE = 2;
 	private static final int[] DATA_SIZE = {1, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
 	
-	public JpegExif(File f) throws IOException
-	{
-		BufferedInputStream buff = new BufferedInputStream(new FileInputStream (f));
-		//get exif data
-		Jpeg jpeg = new Jpeg(buff);
-		byte[] exif = jpeg.exif;
-			
+	public JpegExif(byte[] exif) throws IOException
+	{		
+		if(exif == null)
+			return;
+		
 		position = 0;
-			
+		
 		//read endian info
 		if( (char)exif[position] == 'M' && (char)exif[position+1] == 'M' )
 			bigEndian = true;
@@ -35,7 +46,7 @@ public class JpegExif {
 			bigEndian = false;
 		else throw new IOException("Error endian information");
 		position += 2;
-			
+		
 		//check tag mark
 		if (bigEndian)
 		{
@@ -55,50 +66,117 @@ public class JpegExif {
 			
 		//read each IFD and find GPS IFD. 
 		//read IFD0
-		ifd0 = read_ifd(exif);
-			
+		ifd0 = new LinkedList<Entry>( Arrays.asList(read_ifd(exif)) );
+
 		//read sub IFD
-		if( ifd_offset[1]!= 0 ) 
+		if( sub_offset != 0 ) 
 		{
-			position = ifd_offset[1];
-			sub_ifd = read_ifd(exif);
+			position = sub_offset;
+			sub_ifd = new LinkedList<Entry>( Arrays.asList(read_ifd(exif)) );
+			analyzeSubIfd();
 		}
 
 		//read IFD 1
-		if( ifd_offset[2]!= 0 )
+		if( ifd1_offset != 0 )
 		{
-			position = ifd_offset[2];
-			ifd1 = read_ifd(exif);
+			position = ifd1_offset;
+			ifd1 = new LinkedList<Entry>( Arrays.asList(read_ifd(exif)) );
 		}
 			
 		//read GPS IFD
-		if(ifd_offset[0] != 0)
+		if( gps_offset != 0 )
 		{
-			position = ifd_offset[0];
-			gps_entry = read_ifd(exif);
+			position = gps_offset;
+			gps_entry = new LinkedList<Entry>( Arrays.asList(read_ifd(exif)) );
+		}
+		
+		analyzeThumbnail();
+		if( thumbnail_offset != 0 ) {
+			position = thumbnail_offset;
+			byte[] thumbnail_data = new byte[thumbnail_length];
+			for(int i=0; i<thumbnail_length;i++)
+				thumbnail_data[i] = exif[position + i];
+			thumbnail = new Thumbnail(thumbnail_data, thumbnail_format);
 		}
 	}
 	
+	//Return: endian info represented by a boolean. If return value is true, exif is big endian. 
+	//		  Exif is in small endian otherwise.
+	public boolean isBigEndian()
+	{
+		return bigEndian;
+	}
+	
+	//Return: Thumbnail object which contains thumbnail image
+	public Thumbnail getThumbnail()
+	{
+		return thumbnail;
+	}
+	
+	//Return: offset to thumbnail format
+	public int getImageWidth()
+	{
+		return image_width;
+	}
+		
+	//Return: offset to thumbnail format
+	public int getImageHeight()
+	{
+		return image_height;
+	}
+	
+	//Return: offset to thumbnail format
+	public int getThunmnailFormat()
+	{
+		return thumbnail_format;
+	}
+	
+	//Return: offset to thumbnail offset
+	public int getThunmnailOffset()
+	{
+		return thumbnail_offset;
+	}
+	
+	//Return: offset to thumbnail length
+	public int getThunmnailLength()
+	{
+		return thumbnail_length;
+	}
+	
 	//Return: a collection of Entry which is gps IFD
-	public Entry[] getGpsIfd()
+	public LinkedList<Entry> getGpsIfd()
 	{
 		return gps_entry;
 	}
 	
+	//Return: true if gps IFD is set. It always return true.
+	public boolean setGpsIfd(LinkedList<Entry> gps)
+	{
+		this.gps_entry = gps;
+		return true;
+	}
+	
 	//Return: a collection of Entry which is IFD0
-	public Entry[] getIfd0()
+	public LinkedList<Entry> getIfd0()
 	{
 		return ifd0;
 	}
 	
+	//Return: true if IFD0 is set. It always return true.
+	public boolean setIfd0(LinkedList<Entry> ifd0)
+	{
+		this.ifd0 = ifd0;
+		return true;
+	}
+	
 	//Return: a collection of Entry which is sub IFD
-	public Entry[] getSubIfd()
+	public LinkedList<Entry> getSubIfd()
 	{
 		return sub_ifd;
 	}
 	
 	//Return: a collection of Entry which is IFD1
-	public Entry[] getIfd1()
+	public LinkedList<Entry> getIfd1()
 	{
 		return ifd1;
 	}
@@ -132,18 +210,20 @@ public class JpegExif {
 			entry_collection[i].setTagNumber(tag_number);
 			position += 2;
 			
-			//set data format
-			byte[] data_format = new byte[2];
-			data_format[0] = exif[position];
-			data_format[1] = exif[position+1];
-			entry_collection[i].setDataFormat( getInt16(data_format) );
+			//set data format 
+			byte[] data_format_value = new byte[2];
+			data_format_value[0] = exif[position];
+			data_format_value[1] = exif[position+1];
+			int data_format = getInt16(data_format_value);
+			entry_collection[i].setDataFormat( data_format );
 			position += 2;
 			
 			//set number of components
-			byte[] component_count = new byte[4];
+			byte[] component_count_value = new byte[4];
 			for(int j=0; j<4; j++)
-				component_count[j] = exif[position+j];
-			entry_collection[i].setComponentCount( getLong32(component_count) );
+				component_count_value[j] = exif[position+j];
+			long component_count = getLong32(component_count_value);
+			entry_collection[i].setComponentCount( component_count );
 			position += 4;
 			
 			//set data offset
@@ -157,18 +237,47 @@ public class JpegExif {
 			Object value = getValue(offset, entry_collection[i].getDataFormat(), entry_collection[i].getComponentCount(), exif);
 			entry_collection[i].setValue(value);
 			
-			//set endian
-			entry_collection[i].setEndian(bigEndian);
+			//set byte to big endian
+			if(!bigEndian)
+				switch(data_format)
+				{
+				case 2: case 4: case 5:
+				case 9: case 10: case 11:
+				case 12:
+					swapByte(offset);
+					break;
+				case 8:
+					if(!bigEndian) {
+						//swap byte value because it is import to output in big endian
+						byte temp = offset[0];
+						offset[0] = offset[1];
+						offset[1]= temp;
+					}
+					break;
+				case 3:
+					if((int)(component_count * DATA_SIZE[data_format]) == 2) {
+						byte temp = offset[0];
+						offset[0] = offset[1];
+						offset[1]= temp;
+					} else
+						swapByte(offset);
+					break;
+				}
+			
 			analyzeEntry(entry_collection[i]);
 		}
 		
 		//read offset to IFD 1
 		byte[] ifd1_offset_data = new byte[4];
-		for(int i=0; i<4; i++)
-			ifd1_offset_data[i] = exif[position + i];
-		int offset = (int)getLong32(ifd1_offset_data);
+		if(bigEndian)
+			for(int i=0; i<4; i++)
+				ifd1_offset_data[i] = exif[position + i];
+		else
+			for(int i=0; i<4; i++)
+				ifd1_offset_data[i] = exif[position + 3 - i];
+		int offset = (int)BigEndian.getLong32(ifd1_offset_data);
 		//if offset is 0 means this IFD does not link next IFD
-		if (offset != 0) ifd_offset[2] = offset;
+		if (offset != 0) ifd1_offset = offset;
 		
 		return entry_collection;
 	}
@@ -207,20 +316,21 @@ public class JpegExif {
 		byte[] tag_number = entry.getTagNumber();
 		//set offset to gps IFD
 		if( (tag_number[0] & 0xFF) == 0x88 && (tag_number[1] & 0xFF) == 0x25 )
-			ifd_offset[0] = (int)((long)(entry.getValue()));
+			gps_offset = getObjectValue(entry.getValue());
 		//set offset to subIFD
-		if ( (tag_number[0] & 0xFF) == 0x87 && (tag_number[1] & 0xFF) == 0x69 )
-			ifd_offset[1] = (int)((long)(entry.getValue()));
+		else if ( (tag_number[0] & 0xFF) == 0x87 && (tag_number[1] & 0xFF) == 0x69 )
+			sub_offset = getObjectValue(entry.getValue());
 	}
 	
 	//Return: the value associate to data format and offset is returned as an Object
 	private Object getValue(byte[] offset, int format, long component_count, byte[] exif)
 	{
-		int size = (int)component_count * DATA_SIZE[format];
+		int size = (int)(component_count * DATA_SIZE[format]);
+		if(size<0) System.out.println(component_count);
 		byte[] value = new byte[size];
 		if (size > 4)
 		{
-			int value_address = (int)getLong32(offset);
+			int value_address = (int) getLong32(offset);
 			for(int i=0; i<size; i++)
 				value[i] = exif[value_address+i];
 		}
@@ -228,11 +338,25 @@ public class JpegExif {
 		switch(format)
 		{
 			case 1: //unsigned byte
-				return value[3];
+				return value[0];
 			case 2: //ASCII string
 				return new String(value);
 			case 3: //unsigned short
-				return getInt16(value);
+				if(size == 2) {
+					byte[] short_value = new byte[2];
+					short_value[0] = value[0];
+					short_value[1] = value[1];
+					return getInt16(short_value);
+				} else {
+					Integer[] result = new Integer[size/SHORT_SIZE];
+					for(int i=0; i < size / SHORT_SIZE ; i++) {
+						byte[] short_value = new byte[2];
+						short_value[0] = value[2 * i];
+						short_value[1] = value[2 * i + 1];
+						result[i] = getInt16(short_value);
+					}
+					return result;
+				}
 			case 4: //unsigned long
 				return getLong32(value);
 			case 5: //unsigned rational
@@ -247,12 +371,12 @@ public class JpegExif {
 					}
 					long numerator = getLong32(numerator_data);
 					long denominator = getLong32(denominator_data);
-					double result = (double)(numerator) / denominator;
+					int[] result = {(int) numerator, (int) denominator};
 					return result;
 				} 
 				else
 				{
-					double[] result = new double[size/RATIONAL_SIZE];
+					int[] result = new int[size / RATIONAL_SIZE * 2];
 					for(int i=0; i<size/RATIONAL_SIZE; i++)
 					{
 						byte[] numerator_data = new byte[4];
@@ -260,56 +384,113 @@ public class JpegExif {
 						for(int j=0; j<4; j++)
 						{
 							numerator_data[j] = value[j + RATIONAL_SIZE * i];
-							denominator_data[j] = value[j+ + RATIONAL_SIZE * i + 4];
+							denominator_data[j] = value[j+ RATIONAL_SIZE * i + 4];
 						}
 						long numerator = getLong32(numerator_data);
 						long denominator = getLong32(denominator_data);
-						result[i] = (double)(numerator) / denominator; 
+						result[2*i] = (int) numerator;
+						result[2*i+1] = (int) denominator;
 					}
 					return result;
 				}
 			case 6: //signed byte
-				return (char)value[3];
+				return (char)value[0];
 			case 7: //undefined
-				return "unknown data";
+				return value;
 			case 8: //signed short
-				return bigEndian ? 
-					   BigEndian.getSignedShort(value[2], value[3]) : 
-					   SmallEndian.getSignedShort(value[2], value[3]);
-			case 9: //signed long
 				return getInt32(value);
+			case 9: //signed long
+				return BigEndian.getInt32(value);
 			case 10: //signed rational
 				byte[] numerator_data = new byte[4];
 				byte[] denominator_data = new byte[4];
 				for(int i=0; i<4; i++)
 				{
 					numerator_data[i] = value[i];
-					denominator_data[i] = value[i + 4];
+					denominator_data[i] = value[i+4];
 				}
-				double numerator = getInt32(numerator_data);
-				double denominator = getInt32(denominator_data);
-				return numerator / denominator;
+				long numerator = getLong32(numerator_data);
+				long denominator = getLong32(denominator_data);
+				int[] result = {(int) numerator, (int) denominator};
+				return result;
 			case 11: //single float
-				if(!bigEndian)
+				if(!bigEndian) {
 					for(int i=0; i<2; i++)
 					{
 						byte temp = value[i];
 						value[i] = value[4-i];
 						value[4-i] = temp;
 					}
+				}
 				return ByteBuffer.wrap(value).getFloat();
 			case 12: //single double
-				if(!bigEndian)
+				if(!bigEndian) {
 					for(int i=0; i<4; i++)
 					{
 						byte temp = value[i];
 						value[i] = value[4-i];
 						value[4-i] = temp;
 					}
+				}
 				return ByteBuffer.wrap(value).getDouble();
 			default:
 				return "unknown data";
 		}
+	}
+	
+	//Post: a byte[] which is swaped
+	private void swapByte(byte[] b)
+	{
+		for(int i=0; i<b.length/2; i++ ) {
+			byte temp = b[i];
+			b[i] = b[b.length - i - 1];
+			b[b.length - i - 1] = temp;
+		}
+	}
+	
+	//Post: read offset and data length of thumbnail image
+	private void analyzeThumbnail()
+	{
+		if(ifd1 != null)
+			for (Entry e : ifd1) {
+				byte[] tag_number = e.getTagNumber();
+				if ( (tag_number[0] & 0xFF) == 0x01 && (tag_number[1] & 0xFF) == 0x03 ) {
+					thumbnail_format = getObjectValue(e.getValue());
+				} else if ( (tag_number[0] & 0xFF) == 0x02 && (tag_number[1] & 0xFF) == 0x01 ) {
+					thumbnail_offset = getObjectValue(e.getValue());
+				} else if ( (tag_number[0] & 0xFF) == 0x02 && (tag_number[1] & 0xFF) == 0x02 ) {
+					thumbnail_length = getObjectValue(e.getValue());
+				} else if ( (tag_number[0] & 0xFF) == 0x01 && (tag_number[1] & 0xFF) == 0x11 ) {
+					thumbnail_offset = getObjectValue(e.getValue());
+				} else if ( (tag_number[0] & 0xFF) == 0x01 && (tag_number[1] & 0xFF) == 0x17 ) {
+					thumbnail_length = getObjectValue(e.getValue());
+				} else if ( (tag_number[0] & 0xFF) == 0x01 && (tag_number[1] & 0xFF) == 0x06 ) {
+					thumbnail_format = getObjectValue(e.getValue());
+				}
+			}
+	}
+	
+	//Post: image width and height would be available
+	private void analyzeSubIfd()
+	{
+		for(Entry e : sub_ifd) {
+			byte[] tag_number = e.getTagNumber();
+			if ( (tag_number[0] & 0xFF) == 0xa0 && (tag_number[1] & 0xFF) == 0x02 ) {
+				image_width = getObjectValue(e.getValue());
+			} else if ( (tag_number[0] & 0xFF) == 0xa0 && (tag_number[1] & 0xFF) == 0x03 ) {
+				image_height = getObjectValue(e.getValue());
+			}
+		}
+	}
+	
+	//Pre: Object should be int or long
+	//Return: an int that represent by the ibject
+	private int getObjectValue(Object obj)
+	{
+		if(obj instanceof Integer)
+			return (int)(obj);
+		else
+			return (int)((long)obj);
 	}
 	
 	//Return: an signed int which 4 bytes represent.
@@ -327,7 +508,6 @@ public class JpegExif {
 	//Return: an int which 2 bytes represent
 	private int getInt16(byte[] value)
 	{
-		
 		return bigEndian ? BigEndian.getInt16(value) : SmallEndian.getInt16(value);
 	}
 }
