@@ -15,3 +15,6 @@ git clone https://github.com/SichengYang/Java-Exif-Editor.git
 ```
 ## License
 - It is under Creative Commons Zero v1.0 Universal 
+
+## Sample Usage
+- -> App.java under src
