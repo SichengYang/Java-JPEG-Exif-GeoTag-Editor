@@ -32,8 +32,10 @@ public class TestEquals {
 		entry2.setValue("test");
 
 		assertEquals(entry1.equals(entry2), true);
+		assertEquals(entry1.equals((Object)entry2), true);
 
 		entry2.setValue("Test");
 		assertEquals(entry1.equals(entry2), false);
+		assertEquals(entry1.equals((Object)entry2), true);
 	}
 }

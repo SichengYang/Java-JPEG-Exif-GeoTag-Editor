@@ -39,7 +39,7 @@ public class OutputSetTest {
 						analyzeOutput(f, output);
 				}
 			} catch (Exception e) {
-				System.err.println("Failed to remove " + f.getName() + " because of " + e);
+				System.err.println("Failed to remove " + f.getName() + " because " + e.getMessage());
 			}
 		}
 		
@@ -52,7 +52,7 @@ public class OutputSetTest {
 					if (outputSet.updateGeoTag(output, latitude, longitude))
 						analyzeOutput(f, output);
 				} catch (Exception e) {
-					System.err.println("Failed to update " + f.getName() + " because of " + e);
+					System.err.println("Failed to update " + f.getName() + " because " + e.getMessage());
 				}
 			}
 		}

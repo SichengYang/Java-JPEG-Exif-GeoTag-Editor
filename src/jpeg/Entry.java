@@ -118,14 +118,18 @@ public class Entry
 			return ( (String)value ).equals( (entry.getValue()) );
 		case 3: //unsigned short
 			if(value.getClass().isArray() && entry.getValue().getClass().isArray()) {
-				Integer[] value1 = (Integer[]) value;
-				Integer[] value2 = (Integer[]) entry.getValue();
+				int[] value1 = (int[]) value;
+				int[] value2 = (int[]) entry.getValue();
 				return Arrays.equals(value1, value2);
 			}
 			else	
 				return (int)value == (int)(entry.getValue());
 		case 4: //unsigned long
-			return (long)value == (long)(entry.getValue());
+		case 9: //signed long
+			if(value.getClass().isArray() && entry.getValue().getClass().isArray()) {
+				return Arrays.equals((long[])value, (long[])(entry.getValue()));
+			} else
+				return (long)value == (long)(entry.getValue());
 		case 5: //unsigned rational
 			if(value.getClass().isArray() && entry.getValue().getClass().isArray()) {
 				int[] value1 = (int[]) value;
@@ -142,8 +146,6 @@ public class Entry
 			return Arrays.equals((byte[])value, (byte[])(entry.getValue()));
 		case 8: //signed short
 			return (short)value == (short)(entry.getValue());
-		case 9: //signed long
-			return (long)value == (long)(entry.getValue());
 		case 10: //signed rational
 			if(value.getClass().isArray() && entry.getValue().getClass().isArray()) {
 				int[] value1 = (int[]) value;

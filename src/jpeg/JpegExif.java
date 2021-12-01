@@ -20,7 +20,7 @@ public class JpegExif {
 	private int thumbnail_length = 0;
 	private int image_width = 0;
 	private int image_height = 0;
-
+	
 	private LinkedList<Entry> gps_entry;
 	private LinkedList<Entry> ifd0;
 	private LinkedList<Entry> sub_ifd;
@@ -30,6 +30,7 @@ public class JpegExif {
 	private static final int HEADER_SIZE = 8;
 	private static final int RATIONAL_SIZE = 8;
 	private static final int SHORT_SIZE = 2;
+	private static final int LONG_SIZE = 4;
 	private static final int[] DATA_SIZE = {1, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
 
 	public JpegExif(byte[] exif) throws IOException
@@ -241,31 +242,24 @@ public class JpegExif {
 			if(!bigEndian)
 				switch(data_format)
 				{
-				case 4: case 5:
-				case 9: case 10: case 11:
-				case 12:
-					swapByte(offset);
-					break;
-				case 8:
-					if(!bigEndian) {
-						//swap byte value because it is import to output in big endian
-						byte temp = offset[0];
-						offset[0] = offset[1];
-						offset[1]= temp;
-					}
-					break;
-				case 3:
-					if((int)(component_count * DATA_SIZE[data_format]) <= 4) {
-						byte temp = offset[0];
-						offset[0] = offset[1];
-						offset[1]= temp;
-					} else
+					case 4: case 5:
+					case 9: case 10: case 11:
+					case 12:
 						swapByte(offset);
-					break;
-				
-				case 2:
-					if((int)(component_count * DATA_SIZE[data_format]) > 4)
-						swapByte(offset);
+						break;
+					case 8:
+					case 3:
+						if((int)(component_count * DATA_SIZE[data_format]) <= 4) {
+							byte temp = offset[0];
+							offset[0] = offset[1];
+							offset[1]= temp;
+						} else
+							swapByte(offset);
+						break;
+					
+					case 2:
+						if((int)(component_count * DATA_SIZE[data_format]) > 4)
+							swapByte(offset);
 				}
 
 			analyzeEntry(entry_collection[i]);
@@ -353,7 +347,7 @@ public class JpegExif {
 				short_value[1] = value[1];
 				return getInt16(short_value);
 			} else {
-				Integer[] result = new Integer[size/SHORT_SIZE];
+				int[] result = new int[size/SHORT_SIZE];
 				for(int i=0; i < size / SHORT_SIZE ; i++) {
 					byte[] short_value = new byte[2];
 					short_value[0] = value[2 * i];
@@ -363,8 +357,20 @@ public class JpegExif {
 				return result;
 			}
 		case 4: //unsigned long
-			return getLong32(value);
+			if(size == LONG_SIZE)
+				return getLong32(value);
+			else{
+				long[] result = new long[size/LONG_SIZE];
+				for(int i=0; i < size / LONG_SIZE ; i++) {
+					byte[] long_value = new byte[4];
+					for(int j=0; j<4; j++)
+						long_value[j] = value[2*i + j];
+					result[i] = getLong32(long_value);
+				}
+				return result;
+			}
 		case 5: //unsigned rational
+		case 10: //signed rational
 			if(size == RATIONAL_SIZE)
 			{
 				byte[] numerator_data = new byte[4];
@@ -374,9 +380,9 @@ public class JpegExif {
 					numerator_data[i] = value[i];
 					denominator_data[i] = value[i+4];
 				}
-				long numerator = getLong32(numerator_data);
-				long denominator = getLong32(denominator_data);
-				int[] result = {(int) numerator, (int) denominator};
+				int numerator = getInt32(numerator_data);
+				int denominator = getInt32(denominator_data);
+				int[] result = {numerator, denominator};
 				return result;
 			} 
 			else
@@ -391,10 +397,10 @@ public class JpegExif {
 						numerator_data[j] = value[j + RATIONAL_SIZE * i];
 						denominator_data[j] = value[j+ RATIONAL_SIZE * i + 4];
 					}
-					long numerator = getLong32(numerator_data);
-					long denominator = getLong32(denominator_data);
-					result[2*i] = (int) numerator;
-					result[2*i+1] = (int) denominator;
+					int numerator = getInt32(numerator_data);
+					int denominator = getInt32(denominator_data);
+					result[2*i] = numerator;
+					result[2*i+1] = denominator;
 				}
 				return result;
 			}
@@ -403,21 +409,34 @@ public class JpegExif {
 		case 7: //undefined
 			return value;
 		case 8: //signed short
-			return getInt32(value);
-		case 9: //signed long
-			return BigEndian.getInt32(value);
-		case 10: //signed rational
-			byte[] numerator_data = new byte[4];
-			byte[] denominator_data = new byte[4];
-			for(int i=0; i<4; i++)
-			{
-				numerator_data[i] = value[i];
-				denominator_data[i] = value[i+4];
+			if(size == 2) {
+				byte[] short_value = new byte[2];
+				short_value[0] = value[0];
+				short_value[1] = value[1];
+				return bigEndian ? BigEndian.getSignedShort(short_value) : SmallEndian.getSignedShort(short_value);
+			} else {
+				short[] result = new short[size/SHORT_SIZE];
+				for(int i=0; i < size / SHORT_SIZE ; i++) {
+					byte[] short_value = new byte[2];
+					short_value[0] = value[2 * i];
+					short_value[1] = value[2 * i + 1];
+					result[i] = bigEndian ? BigEndian.getSignedShort(short_value) : SmallEndian.getSignedShort(short_value);
+				}
+				return result;
 			}
-			long numerator = getLong32(numerator_data);
-			long denominator = getLong32(denominator_data);
-			int[] result = {(int) numerator, (int) denominator};
-			return result;
+		case 9: //signed long
+			if(size == LONG_SIZE)
+				return getInt32(value);
+			else{
+				int[] result = new int[size/LONG_SIZE];
+				for(int i=0; i < size / LONG_SIZE ; i++) {
+					byte[] long_value = new byte[4];
+					for(int j=0; j<4; j++)
+						long_value[j] = value[2*i + j];
+					result[i] = getInt32(long_value);
+				}
+				return result;
+			}
 		case 11: //single float
 			if(!bigEndian) {
 				for(int i=0; i<2; i++)

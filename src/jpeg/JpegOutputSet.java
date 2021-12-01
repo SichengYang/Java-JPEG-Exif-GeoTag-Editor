@@ -532,29 +532,36 @@ public class JpegOutputSet {
 			if(e.getComponentCount() * DATA_SIZE[e.getDataFormat()] > 4) {
 				switch(e.getDataFormat())
 				{
-				case 2: //ASCII string
-					outputStream.write( ((String)(e.getValue())).getBytes() );
-					break;
-				case 3: //unsigned short
-					Integer[] data = (Integer[])(e.getValue());
-					for(int short_value : data)
-						outputStream.writeShort(short_value);
-					break;
-				case 5: //unsigned rational
-					int[] rational_data = (int[]) e.getValue();
-					for(int d : rational_data)
-						outputStream.writeInt(d);
-					break;
-				case 7: //undefined
-					outputStream.write( (byte[])(e.getValue()) );
-					break;
-				case 10: //signed rational
-					rational_data = (int[]) e.getValue();
-					for(int d : rational_data)
-						outputStream.writeInt(d);
-					break;
-				default:
-					throw new IOException("Illegal data format" + e.getDataFormat());
+					case 2: //ASCII string
+						outputStream.write( ((String)(e.getValue())).getBytes() );
+						break;
+					case 3: //unsigned short
+						int[] data = (int[])(e.getValue());
+						for(int short_value : data)
+							outputStream.writeShort(short_value);
+						break;
+					case 4: //unsigned long
+						long[] long_data = (long[]) (e.getValue());
+						for(long long_value : long_data)
+							outputStream.writeInt((int)long_value);
+						break;
+					case 5: //unsigned rational
+					case 9: //signed long
+					case 10: //signed rational
+						int[] rational_data = (int[]) e.getValue();
+						for(int d : rational_data)
+							outputStream.writeInt(d);
+						break;
+					case 7: //undefined
+						outputStream.write( (byte[])(e.getValue()) );
+						break;
+					case 8: //signed short
+						short[] short_data = (short[])(e.getValue());
+						for(int short_value : short_data)
+							outputStream.writeShort(short_value);
+						break;
+					default:
+						throw new IOException("Illegal data format" + e.getDataFormat());
 				}
 			}
 		}

@@ -44,7 +44,7 @@ public class App
 					if (outputSet.updateGeoTag(output, latitude, longitude))
 						System.out.println("Update " + f.getName());
 				} catch (Exception e) {
-					System.out.println("Failed to update " + f.getName());
+					System.out.println("Failed to update " + f.getName() + " because of " + e);
 				}
 			}
 		}
