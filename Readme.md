@@ -2,7 +2,7 @@
 ***
 
 ## Description
-This is a Java library that can let user scan the JPEG exif and report all tags.
+- This is a Java library that can let user scan the JPEG exif and report all tags.
 
 ## Functions:
 - This library can scan the exif data and report to users.
@@ -13,3 +13,5 @@ This is a Java library that can let user scan the JPEG exif and report all tags.
 ```
 git clone https://github.com/SichengYang/Java-Exif-Editor.git
 ```
+## License
+- It is under Creative Commons Zero v1.0 Universal 
