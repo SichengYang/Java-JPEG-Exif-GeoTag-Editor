@@ -9,7 +9,7 @@ public class App
 	public static void main(String[] args) throws FileNotFoundException, IOException
 	{
 		double latitude = 50.0 + 30.0 / 60 + 55.77 / 3600;
-		double longitude = -(100.0 + 50.0 / 60 + 10.8 / 3600);
+		double longitude = 100.0 + 50.0 / 60 + 10.8 / 3600;
 		
 		File remove_results = new File("./assets/remove");
 		if(!remove_results.exists())
@@ -48,9 +48,5 @@ public class App
 				}
 			}
 		}
-		
-		File output = new File("./assets/update/Pixel-2-XL.jpg");
-		Jpeg jpeg = new Jpeg(output);
-		jpeg.exif.print();
 	}
 }

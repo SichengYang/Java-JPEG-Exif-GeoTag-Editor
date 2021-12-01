@@ -198,7 +198,7 @@ public class Entry
 			int[] cast_value = (int[])value;
 			result += " value: ";
 			for (int i=0; i<cast_value.length/2; i++)
-				result += (double)cast_value[2*i]/cast_value[2*i+1] + " ";
+				result += String.format("%d/%d:%.2f ", cast_value[2*i], cast_value[2*i+1], (double)cast_value[2*i]/cast_value[2*i+1] );
 		} else if(dataFormat == 3 && value.getClass().isArray()) {
 			int[] cast_value = (int[])value;
 			result += " value: ";
