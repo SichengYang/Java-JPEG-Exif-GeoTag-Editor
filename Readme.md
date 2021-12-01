@@ -17,4 +17,8 @@ git clone https://github.com/SichengYang/Java-Exif-Editor.git
 - It is under Creative Commons Zero v1.0 Universal 
 
 ## Sample Usage
-- -> App.java under src
+- App.java under src
+
+## Import Guide
+
+- import jpeg.*;
