@@ -48,5 +48,9 @@ public class App
 				}
 			}
 		}
+		
+		File output = new File("./assets/update/Pixel-2-XL.jpg");
+		Jpeg jpeg = new Jpeg(output);
+		jpeg.exif.print();
 	}
 }

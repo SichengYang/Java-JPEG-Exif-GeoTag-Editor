@@ -27,4 +27,10 @@ public class Thumbnail {
 	{
 		return thumbnail_data;
 	}
+	
+	//Return: thumbnail format as an int
+	public int getFormat()
+	{
+		return thumbnail_format;
+	}
 }

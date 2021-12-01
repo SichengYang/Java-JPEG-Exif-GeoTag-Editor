@@ -200,7 +200,7 @@ public class Entry
 			for (int i=0; i<cast_value.length/2; i++)
 				result += (double)cast_value[2*i]/cast_value[2*i+1] + " ";
 		} else if(dataFormat == 3 && value.getClass().isArray()) {
-			Integer[] cast_value = (Integer[])value;
+			int[] cast_value = (int[])value;
 			result += " value: ";
 			for (int i=0; i<cast_value.length; i++)
 				result += cast_value[i] + " ";

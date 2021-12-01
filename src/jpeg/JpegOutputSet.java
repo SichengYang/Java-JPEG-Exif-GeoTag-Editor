@@ -52,9 +52,12 @@ public class JpegOutputSet {
 		String longitude_ref;
 		int[] longitude_data = {0, 1000, 0 , 1000, 0, 1000};
 
-		latitude_ref = latitude < 0 ? "S " : "N ";
-		longitude_ref = longitude < 0 ? "W " : "E ";
-
+		latitude_ref = latitude < 0 ? "S" : "N";
+		longitude_ref = longitude < 0 ? "W" : "E";
+		
+		latitude = Math.abs(latitude);
+		longitude = Math.abs(longitude);
+		
 		//set up latitude
 		latitude_data[0] = (int)latitude * 1000;
 		latitude %= 1;
@@ -83,10 +86,13 @@ public class JpegOutputSet {
 		latitude_ref_tag[0] = 0x00;
 		latitude_ref_tag[1] = 0x01;
 		byte[] latitude_ref_offset = new byte[4];
-		if(latitude < 0)
-			latitude_ref_offset[3] = (byte)'S';
+		latitude_ref_offset[1] = 0x00;
+		latitude_ref_offset[2] = 0x00;
+		latitude_ref_offset[3] = 0x00;
+		if(latitude_ref.equals("N"))
+			latitude_ref_offset[0] = (byte)0x53;
 		else
-			latitude_ref_offset[3] = (byte)'N';
+			latitude_ref_offset[0] = (byte)0x4E;
 		Entry latitude_ref_entry = new Entry(latitude_ref_tag, REF_DATA_TYPE, 
 				REF_COMPONENT_COUNT, (Object)latitude_ref,
 				latitude_ref_offset);
@@ -105,11 +111,13 @@ public class JpegOutputSet {
 		longitude_ref_tag[0] = 0x00;
 		longitude_ref_tag[1] = 0x03;
 		byte[] longitude_ref_offset = new byte[4];
-		if(longitude < 0)
-			longitude_ref_offset[3] = (byte)'W';
+		longitude_ref_offset[1] = 0x00;
+		longitude_ref_offset[2] = 0x00;
+		longitude_ref_offset[3] = 0x00;
+		if(longitude_ref.equals("E"))
+			longitude_ref_offset[0] = 0x57;
 		else
-			longitude_ref_offset[3] = (byte)'E';
-		longitude_ref_offset[0] = longitude_ref_offset[1] = 0x00;
+			longitude_ref_offset[0] = 0x45;
 		Entry longitude_ref_entry = new Entry(longitude_ref_tag, REF_DATA_TYPE, 
 				REF_COMPONENT_COUNT, (Object)longitude_ref,
 				longitude_ref_offset);
@@ -331,7 +339,8 @@ public class JpegOutputSet {
 			outputStream.writeInt((int)(e.getComponentCount()));
 
 			//write offset
-			if((tagNumber[0] & 0xFF) == 0x02 && (tagNumber[1] & 0xFF) == 0x01) { //write offset to thumbnail image
+			if( ((tagNumber[0] & 0xFF) == 0x02 && (tagNumber[1] & 0xFF) == 0x01) ||
+				((tagNumber[0] & 0xFF) == 0x01 && (tagNumber[1] & 0xFF) == 0x11) ) { //write offset to thumbnail image
 				int offset = HEADER;
 
 				LinkedList<Entry> ifd0 = exif.getIfd0();
