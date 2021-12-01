@@ -570,11 +570,10 @@ public class JpegOutputSet {
 	//Output: write data that is always the same for jpeg
 	private void writeStableData(DataOutputStream outputStream) throws IOException
 	{
-		final byte[] header = {(byte)0xff, (byte)0xE1};
+		final byte[] header = {(byte)0xFF, (byte)0xE1};
 		outputStream.write(header);
 
-		int exif_size = getExifSize();
-		outputStream.writeShort(exif_size);
+		outputStream.writeShort(getExifSize());
 
 		//write exif tag
 		outputStream.write('E');
