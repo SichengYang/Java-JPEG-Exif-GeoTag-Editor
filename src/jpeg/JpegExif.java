@@ -62,8 +62,8 @@ public class JpegExif {
 		byte[] offset_data = new byte[4];
 		for( int i=0; i<4; i++ )
 			offset_data[i] = exif[position+i];
-		long first_ifd_offset = getLong32(offset_data) - HEADER_SIZE;
-		position += (4 + (int)first_ifd_offset);
+		int first_ifd_offset = getInt32(offset_data) - HEADER_SIZE;
+		position += (LONG_SIZE + first_ifd_offset); //java only support int to index, although document states that offset is a long
 
 		//read each IFD and find GPS IFD. 
 		//read IFD0
@@ -223,7 +223,7 @@ public class JpegExif {
 			byte[] component_count_value = new byte[4];
 			for(int j=0; j<4; j++)
 				component_count_value[j] = exif[position+j];
-			long component_count = getLong32(component_count_value);
+			int component_count = getInt32(component_count_value);
 			entry_collection[i].setComponentCount( component_count );
 			position += 4;
 
@@ -249,7 +249,7 @@ public class JpegExif {
 						break;
 					case 8:
 					case 3:
-						if((int)(component_count * DATA_SIZE[data_format]) <= 4) {
+						if(component_count * DATA_SIZE[data_format] <= 4) {
 							byte temp = offset[0];
 							offset[0] = offset[1];
 							offset[1]= temp;
@@ -258,7 +258,7 @@ public class JpegExif {
 						break;
 					
 					case 2:
-						if((int)(component_count * DATA_SIZE[data_format]) > 4)
+						if(component_count * DATA_SIZE[data_format] > 4)
 							swapByte(offset);
 				}
 
@@ -273,7 +273,7 @@ public class JpegExif {
 		else
 			for(int i=0; i<4; i++)
 				ifd1_offset_data[i] = exif[position + 3 - i];
-		int offset = (int)BigEndian.getLong32(ifd1_offset_data);
+		int offset = BigEndian.getInt32(ifd1_offset_data);
 		//if offset is 0 means this IFD does not link next IFD
 		if (offset != 0) ifd1_offset = offset;
 
@@ -321,17 +321,16 @@ public class JpegExif {
 	}
 
 	//Return: the value associate to data format and offset is returned as an Object
-	private Object getValue(byte[] offset, int format, long component_count, byte[] exif)
+	private Object getValue(byte[] offset, int format, int component_count, byte[] exif)
 	{
-		int size = (int)(component_count * DATA_SIZE[format]);
+		int size = component_count * DATA_SIZE[format];
 		if(size<0) System.out.println(component_count);
 		byte[] value = new byte[size];
 		if (size > 4)
 		{
-			int value_address = (int) getLong32(offset);
+			int value_address = getInt32(offset);
 			for(int i=0; i<size; i++)
 				value[i] = exif[value_address+i];
-			
 		}
 		else value = offset;
 		switch(format)

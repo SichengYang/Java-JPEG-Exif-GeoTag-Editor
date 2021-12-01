@@ -13,7 +13,7 @@ public class Entry
 {
 	private byte[] tagNumber;
 	private int dataFormat;
-	private long componentCount;
+	private int componentCount;
 	private byte[] offset;
 	private Object value;
 
@@ -22,13 +22,13 @@ public class Entry
 	{
 		tagNumber = null;
 		dataFormat = 0;
-		componentCount = (long)0;
+		componentCount = 0;
 		offset = new byte[4];
 		value = null;
 	}
 
 	//Post: tagNumber, dataFormat, componentCount, and value are set to the passed values.
-	public Entry(byte[] tagNumber, int dataFormat, long componentCount, Object value, byte[] offset)
+	public Entry(byte[] tagNumber, int dataFormat, int componentCount, Object value, byte[] offset)
 	{
 		this.tagNumber = tagNumber;
 		this.dataFormat = dataFormat;
@@ -50,7 +50,7 @@ public class Entry
 	}
 
 	//Post: componentCount is set to componentCount
-	public void setComponentCount(long componentCount)
+	public void setComponentCount(int componentCount)
 	{
 		this.componentCount = componentCount;
 	}
@@ -81,7 +81,7 @@ public class Entry
 	}
 
 	//Return: number of components in this Directory
-	public long getComponentCount()
+	public int getComponentCount()
 	{
 		return componentCount;
 	}

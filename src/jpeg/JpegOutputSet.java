@@ -45,8 +45,6 @@ public class JpegOutputSet {
 	//Return: true if geotag is successfully updated
 	private boolean updateGeoTag(double latitude, double longitude)
 	{
-		removeGeoTag();
-
 		String latitude_ref;
 		int[] latitude_data = {0, 1000, 0 , 1000, 0, 1000};
 		String longitude_ref;
@@ -89,7 +87,7 @@ public class JpegOutputSet {
 		latitude_ref_offset[1] = 0x00;
 		latitude_ref_offset[2] = 0x00;
 		latitude_ref_offset[3] = 0x00;
-		if(latitude_ref.equals("N"))
+		if(latitude_ref.equals("S"))
 			latitude_ref_offset[0] = (byte)0x53;
 		else
 			latitude_ref_offset[0] = (byte)0x4E;
@@ -114,7 +112,7 @@ public class JpegOutputSet {
 		longitude_ref_offset[1] = 0x00;
 		longitude_ref_offset[2] = 0x00;
 		longitude_ref_offset[3] = 0x00;
-		if(longitude_ref.equals("E"))
+		if(longitude_ref.equals("W"))
 			longitude_ref_offset[0] = 0x57;
 		else
 			longitude_ref_offset[0] = 0x45;
@@ -201,9 +199,8 @@ public class JpegOutputSet {
 	//Output: a jpeg is written based on the information in outpu set
 	private boolean write(File output)
 	{
-		DataOutputStream outputStream = null;
 		try {
-			outputStream = new DataOutputStream (new BufferedOutputStream (new FileOutputStream(output)));
+			DataOutputStream outputStream = new DataOutputStream (new BufferedOutputStream (new FileOutputStream(output)));
 
 			//write header
 			final byte[] header = {(byte)0xFF, (byte)0xD8};
@@ -278,7 +275,7 @@ public class JpegOutputSet {
 			outputStream.writeShort(e.getDataFormat());
 
 			//write component count
-			outputStream.writeInt((int)(e.getComponentCount()));
+			outputStream.writeInt(e.getComponentCount());
 
 			//write offset
 			if( e.getComponentCount() * DATA_SIZE[e.getDataFormat()] <= 4 )
@@ -336,7 +333,7 @@ public class JpegOutputSet {
 			outputStream.writeShort(e.getDataFormat());			
 
 			//write component count
-			outputStream.writeInt((int)(e.getComponentCount()));
+			outputStream.writeInt(e.getComponentCount());
 
 			//write offset
 			if( ((tagNumber[0] & 0xFF) == 0x02 && (tagNumber[1] & 0xFF) == 0x01) ||
@@ -415,7 +412,7 @@ public class JpegOutputSet {
 			outputStream.writeShort(e.getDataFormat());
 
 			//write component count
-			outputStream.writeInt((int)(e.getComponentCount()));
+			outputStream.writeInt(e.getComponentCount());
 
 			//write offset
 			if( e.getComponentCount() * DATA_SIZE[e.getDataFormat()] <= 4 )
@@ -461,7 +458,7 @@ public class JpegOutputSet {
 			outputStream.writeShort(e.getDataFormat());
 
 			//write component count
-			outputStream.writeInt((int)e.getComponentCount());
+			outputStream.writeInt(e.getComponentCount());
 
 			//write offset
 			if( (tagNumber[0] & 0xFF) == 0x87 && (tagNumber[1] & 0xFF) == 0x69 ) { //write sub-ifd offset
@@ -551,14 +548,18 @@ public class JpegOutputSet {
 						break;
 					case 4: //unsigned long
 						long[] long_data = (long[]) (e.getValue());
-						for(long long_value : long_data)
-							outputStream.writeInt((int)long_value);
+						for(long long_value : long_data) {
+							outputStream.write((byte)(long_value >> 24 & 0xFF));
+							outputStream.write((byte)(long_value >> 16 & 0xFF));
+							outputStream.write((byte)(long_value >> 8 & 0xFF));
+							outputStream.write((byte)(long_value & 0xFF));
+						}
 						break;
 					case 5: //unsigned rational
 					case 9: //signed long
 					case 10: //signed rational
-						int[] rational_data = (int[]) e.getValue();
-						for(int d : rational_data)
+						int[] int_data = (int[]) e.getValue();
+						for(int d : int_data)
 							outputStream.writeInt(d);
 						break;
 					case 7: //undefined
@@ -616,7 +617,6 @@ public class JpegOutputSet {
 		outputStream.write(0x00);
 		outputStream.write(0x00);
 		outputStream.write(0x08);
-
 	}
 
 	//Return: the size of exif segment
@@ -673,7 +673,7 @@ public class JpegOutputSet {
 
 		if(ifd != null)
 			for(Entry e : ifd) {
-				int data_size = (int) (e.getComponentCount() * DATA_SIZE[e.getDataFormat()]);
+				int data_size = e.getComponentCount() * DATA_SIZE[e.getDataFormat()];
 				if(data_size > 4)
 					size += data_size;
 			}

@@ -12,6 +12,6 @@ public class OutputSetTestRunner {
 		for (Failure failure : result.getFailures())
 			System.out.println(failure.getTrimmedTrace());
 
-		System.out.println(result.wasSuccessful());
+		System.out.println("Test success: " + result.wasSuccessful());
 	}
 }
