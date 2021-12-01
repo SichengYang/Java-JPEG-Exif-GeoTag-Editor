@@ -241,7 +241,7 @@ public class JpegExif {
 			if(!bigEndian)
 				switch(data_format)
 				{
-				case 2: case 4: case 5:
+				case 4: case 5:
 				case 9: case 10: case 11:
 				case 12:
 					swapByte(offset);
@@ -255,13 +255,17 @@ public class JpegExif {
 					}
 					break;
 				case 3:
-					if((int)(component_count * DATA_SIZE[data_format]) == 2) {
+					if((int)(component_count * DATA_SIZE[data_format]) <= 4) {
 						byte temp = offset[0];
 						offset[0] = offset[1];
 						offset[1]= temp;
 					} else
 						swapByte(offset);
 					break;
+				
+				case 2:
+					if((int)(component_count * DATA_SIZE[data_format]) > 4)
+						swapByte(offset);
 				}
 
 			analyzeEntry(entry_collection[i]);
@@ -333,6 +337,7 @@ public class JpegExif {
 			int value_address = (int) getLong32(offset);
 			for(int i=0; i<size; i++)
 				value[i] = exif[value_address+i];
+			
 		}
 		else value = offset;
 		switch(format)

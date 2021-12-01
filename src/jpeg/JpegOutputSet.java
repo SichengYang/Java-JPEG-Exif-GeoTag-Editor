@@ -64,7 +64,6 @@ public class JpegOutputSet {
 		latitude *= 60;
 		latitude_data[4] = (int)(latitude * 1000);
 
-
 		//set up longitude
 		longitude_data[0] = (int)longitude * 1000;
 		longitude %= 1;
@@ -171,22 +170,22 @@ public class JpegOutputSet {
 		//remove latitude reference
 		byte[] tagNumber = {0x00, 0x01};
 		temp.setTagNumber(tagNumber);
-		gps.remove((Object)temp);
-
+		gps.remove(temp);
+		
 		//remove latitude numeric data
 		tagNumber[1] = 0x02;
 		temp.setTagNumber(tagNumber);
-		gps.remove((Object)temp);
+		gps.remove(temp);
 
 		//remove longitude reference
 		tagNumber[1] = 0x03;
 		temp.setTagNumber(tagNumber);
-		gps.remove((Object)temp);
+		gps.remove(temp);
 
 		//remove longitude numeric data
 		tagNumber[1] = 0x04;
 		temp.setTagNumber(tagNumber);
-		gps.remove((Object)temp);
+		gps.remove(temp);
 
 		return true;
 	}

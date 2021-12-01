@@ -128,12 +128,12 @@ public class Entry
 			return (long)value == (long)(entry.getValue());
 		case 5: //unsigned rational
 			if(value.getClass().isArray() && entry.getValue().getClass().isArray()) {
-				double[] value1 = (double[]) value;
-				double[] value2 = (double[]) entry.getValue();
+				int[] value1 = (int[]) value;
+				int[] value2 = (int[]) entry.getValue();
 				return Arrays.equals(value1, value2);
 			} else {
-				double value1 = (double) value;
-				double value2 = (double) entry.getValue();
+				int value1 = (int) value;
+				int value2 = (int) entry.getValue();
 				return value1 == value2;
 			}
 		case 6: //signed byte
@@ -146,12 +146,12 @@ public class Entry
 			return (long)value == (long)(entry.getValue());
 		case 10: //signed rational
 			if(value.getClass().isArray() && entry.getValue().getClass().isArray()) {
-				double[] value1 = (double[]) value;
-				double[] value2 = (double[]) entry.getValue();
+				int[] value1 = (int[]) value;
+				int[] value2 = (int[]) entry.getValue();
 				return Arrays.equals(value1, value2);
 			} else {
-				double value1 = (double) value;
-				double value2 = (double) entry.getValue();
+				int value1 = (int) value;
+				int value2 = (int) entry.getValue();
 				return value1 == value2;
 			}
 		case 11: //single float

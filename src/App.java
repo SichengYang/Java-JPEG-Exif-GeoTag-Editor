@@ -8,16 +8,6 @@ public class App
 {
 	public static void main(String[] args) throws FileNotFoundException, IOException
 	{
-		/*
-		File photo = new File("./assets/Cannon-EOS-M50-no-geotag.JPG");
-		Jpeg jpeg = new Jpeg(photo);
-		File output = new File("./assets/results/editted-" + photo.getName());
-		JpegOutputSet outputSet = new JpegOutputSet(jpeg);
-		double latitude = 50.0 + 30.0 / 60 + 55.77 / 3600;
-		double longitude = 100.0 + 50.0 / 60 + 10.8 / 3600;
-		outputSet.updateGeoTag(output, latitude, longitude);
-		*/
-		
 		double latitude = 50.0 + 30.0 / 60 + 55.77 / 3600;
 		double longitude = 100.0 + 50.0 / 60 + 10.8 / 3600;
 		
@@ -40,7 +30,7 @@ public class App
 				if (outputSet.removeGeoTag(output))
 					System.out.println("Remove " + f.getName());
 				} catch (Exception e) {
-					System.out.println("Failed to remove " + f.getName());
+					System.out.println("Failed to remove " + f.getName() + " because of " + e);
 				}
 			}
 		}
