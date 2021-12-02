@@ -1,6 +1,4 @@
 import java.io.*;
-import java.util.*;
-import jpeg.JpegExif;
 import jpeg.JpegOutputSet;
 import jpeg.Jpeg;
 
