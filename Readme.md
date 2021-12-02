@@ -1,4 +1,4 @@
-# Java JPG/JPEG Geotag Editor:
+<h1 align="center" style="border-bottom: none">Java JPEG GeoTag Editor</h1>
 ***
 
 ## Description
