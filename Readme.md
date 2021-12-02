@@ -4,7 +4,7 @@
 - This is a Java library that can let user scan jpeg/jpg exif, report all tags, and change or remove geotag.
 
 ## Functions
-- This library offers <a href="https://github.com/SichengYang/Java-JPEG-GeoTag-Editor/blob/main/src/jpeg/Jpeg.java">Jpeg</a> which can parse jpeg/jpg and find exif raw data.
+- This library offers <a href="https://github.com/SichengYang/Java-JPEG-GeoTag-Editor/blob/main/src/jpeg/Jpeg.java" target="_blank">Jpeg</a> which can parse jpeg/jpg and find exif raw data.
 - This library offers <a href="https://github.com/SichengYang/Java-JPEG-GeoTag-Editor/blob/main/src/jpeg/JpegExif.java">JpegExif</a> can scan the exif data and report to users.
 - This library offers <a href="https://github.com/SichengYang/Java-JPEG-GeoTag-Editor/blob/main/src/jpeg/JpegOutputSet.java">JpegOutputSet</a> which can let user customize geotag (remove or update).
 
