@@ -20,7 +20,8 @@ public class App
 			update_results.mkdir();
 		
 		File resource = new File("./assets");
-
+		
+		
 		for(File f : resource.listFiles()) {
 			if(f.isFile()) {
 				try {
@@ -34,7 +35,7 @@ public class App
 				}
 			}
 		}
-
+		
 		for(File f : resource.listFiles()) {
 			if(f.isFile()) {
 				try {
@@ -48,5 +49,9 @@ public class App
 				}
 			}
 		}
+		
+		Jpeg jpeg = new Jpeg(new File("./assets/update/New_Chair_2021.jpg"));
+		jpeg.exif.print();
+		
 	}
 }

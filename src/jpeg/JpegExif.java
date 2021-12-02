@@ -15,6 +15,7 @@ public class JpegExif {
 	private int gps_offset = 0;
 	private int sub_offset = 0;
 	private int ifd1_offset = 0;
+	private int interoperability_offset = 0;
 	private int thumbnail_format = 0;
 	private int thumbnail_offset = 0;
 	private int thumbnail_length = 0;
@@ -25,6 +26,7 @@ public class JpegExif {
 	private LinkedList<Entry> ifd0;
 	private LinkedList<Entry> sub_ifd;
 	private LinkedList<Entry> ifd1;
+	private LinkedList<Entry> interoperability_ifd;
 	private Thumbnail thumbnail;
 
 	private static final int HEADER_SIZE = 8;
@@ -89,6 +91,13 @@ public class JpegExif {
 		{
 			position = gps_offset;
 			gps_entry = new LinkedList<Entry>( Arrays.asList(read_ifd(exif)) );
+		}
+		
+		//read interoperability IFD
+		if(interoperability_offset != 0)
+		{
+			position = interoperability_offset;
+			interoperability_ifd = new LinkedList<Entry>( Arrays.asList(read_ifd(exif)) );
 		}
 
 		analyzeThumbnail();
@@ -174,6 +183,12 @@ public class JpegExif {
 	public LinkedList<Entry> getSubIfd()
 	{
 		return sub_ifd;
+	}
+	
+	//Return: a collection of Entry which is interoperability IFD
+	public LinkedList<Entry> getInterIfd()
+	{
+		return interoperability_ifd;
 	}
 
 	//Return: a collection of Entry which is IFD1
@@ -304,6 +319,12 @@ public class JpegExif {
 		if(gps_entry != null){
 			System.out.println("GPS data:");
 			for(Entry e : gps_entry)
+				System.out.println(e);
+		}
+		
+		if(interoperability_ifd != null) {
+			System.out.println("Interoperability data:");
+			for(Entry e : interoperability_ifd)
 				System.out.println(e);
 		}
 	}
@@ -502,6 +523,8 @@ public class JpegExif {
 				image_width = getObjectValue(e.getValue());
 			} else if ( (tag_number[0] & 0xFF) == 0xa0 && (tag_number[1] & 0xFF) == 0x03 ) {
 				image_height = getObjectValue(e.getValue());
+			} else if ( (tag_number[0] & 0xFF) == 0xa0 && (tag_number[1] & 0xFF) == 0x05 ) {
+				interoperability_offset = getObjectValue(e.getValue());
 			}
 		}
 	}

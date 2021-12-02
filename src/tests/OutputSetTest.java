@@ -90,6 +90,12 @@ public class OutputSetTest {
 		
 		if(gps1 != null)
 			checkGps(gps1, gps2);
+		
+		LinkedList<Entry> inter1 = jpeg1.exif.getInterIfd();
+		LinkedList<Entry> inter2 = jpeg2.exif.getInterIfd();
+		
+		if(inter1 != null)
+			checkInter(inter1, inter2);
 	}
 
 	//Post: check all value in ifd0 using JUnit
@@ -188,6 +194,18 @@ public class OutputSetTest {
 		for(int i=0; i<gps1.size(); i++) {
 			Entry e1 = gps1.remove();
 			Entry e2 = gps2.remove();
+			assertEquals(true, e1.equals(e2));
+		}
+	}
+	
+	//Post: checking value in interoperability IFD using JUnit
+	private void checkInter(LinkedList<Entry> inter1, LinkedList<Entry> inter2)
+	{
+		assertEquals(inter1.size(), inter2.size());
+
+		for(int i=0; i<inter1.size(); i++) {
+			Entry e1 = inter1.remove();
+			Entry e2 = inter2.remove();
 			assertEquals(true, e1.equals(e2));
 		}
 	}

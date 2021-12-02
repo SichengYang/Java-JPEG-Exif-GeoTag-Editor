@@ -154,18 +154,6 @@ public class JpegOutputSet {
 			ifd0.add(gps_pointer);
 		}
 		
-		
-		//remove interoperability IFD reference since it is duplicated to GPS
-		Entry interoperability = new Entry();
-		byte[] interoperability_tag = {(byte) 0xA0, (byte) 0x05};
-		interoperability.setTagNumber(interoperability_tag);
-		LinkedList<Entry> sub_ifd = exif.getSubIfd();
-		if(sub_ifd != null)
-			sub_ifd.remove(interoperability);
-		LinkedList<Entry> ifd1 = exif.getIfd1();
-		if(ifd1 != null)
-			ifd1.remove(interoperability);
-		
 		gps.addFirst(longitude_data_entry);
 		gps.addFirst(longitude_ref_entry);
 		gps.addFirst(latitude_data_entry);
@@ -269,9 +257,78 @@ public class JpegOutputSet {
 			writeEntrySize(outputStream, gps_ifd);
 			writeGps(outputStream, gps_ifd);
 		}
+		
+		LinkedList<Entry> interoperability_ifd = exif.getInterIfd();
+		if(interoperability_ifd != null) {
+			writeEntrySize(outputStream, interoperability_ifd);
+			writeInterIfd(outputStream, interoperability_ifd);
+		}
 
 		if(thumbnail != null)
 			outputStream.write(thumbnail.getThumbnailData());
+	}
+	
+	//Output: Write an entry using passed buffered output stream and interoperability data
+	private void writeInterIfd(DataOutputStream outputStream, LinkedList<Entry> interoperability_ifd) throws IOException
+	{
+		int external_data_size = 0;
+		for(Entry e : interoperability_ifd) {
+			//write tag number
+			byte[] tagNumber = e.getTagNumber();
+			outputStream.write(tagNumber);
+
+			//write data format
+			outputStream.writeShort(e.getDataFormat());
+
+			//write component count
+			outputStream.writeInt(e.getComponentCount());
+
+			//write offset
+			if( e.getComponentCount() * DATA_SIZE[e.getDataFormat()] <= 4 )
+				//Just copy data if no external data
+				outputStream.write(e.getOffset());
+			else {
+				int offset = HEADER;
+
+				LinkedList<Entry> ifd0 = exif.getIfd0();
+				if(ifd0 != null) {
+					offset += getEntrySize(ifd0);
+					offset += getEntryDataSize(ifd0);
+				}
+
+				LinkedList<Entry> sub_ifd = exif.getSubIfd();
+				if(sub_ifd != null) {
+					offset += getEntrySize(sub_ifd);
+					offset += getEntryDataSize(sub_ifd);
+				}
+
+				LinkedList<Entry> ifd1 = exif.getIfd1();
+				if(ifd1 != null) {
+					offset += getEntrySize(ifd1);
+					offset += getEntryDataSize(ifd1);
+				}
+				
+				LinkedList<Entry> gps_ifd = exif.getGpsIfd();
+				if(gps_ifd != null) {
+					offset += getEntrySize(gps_ifd);
+					offset += getEntryDataSize(gps_ifd);
+				}
+				
+				offset += getEntrySize(interoperability_ifd);
+
+				offset += external_data_size;
+
+				//calculate how many data is in external data field
+				external_data_size += e.getComponentCount() * DATA_SIZE[e.getDataFormat()];
+
+				//write offset
+				outputStream.writeInt(offset);
+			}
+		}
+
+		outputStream.writeInt(0);
+
+		writeExternalData(outputStream, interoperability_ifd);
 	}
 
 	//Output: Write an entry using passed buffered output stream and ifd1 data
@@ -364,15 +421,19 @@ public class JpegOutputSet {
 					offset += getEntryDataSize(sub_ifd);
 				}
 
-				if(ifd1 != null) {
-					offset += getEntrySize(ifd1);
-					offset += getEntryDataSize(ifd1);
-				}
+				offset += getEntrySize(ifd1);
+				offset += getEntryDataSize(ifd1);
 
 				LinkedList<Entry> gps = exif.getGpsIfd();
 				if(gps != null) {
 					offset += getEntrySize(gps);
 					offset += getEntryDataSize(gps);
+				}
+				
+				LinkedList<Entry> interoperability_ifd = exif.getInterIfd();
+				if(interoperability_ifd != null) {
+					offset += getEntrySize(interoperability_ifd);
+					offset += getEntryDataSize(interoperability_ifd);
 				}
 
 				outputStream.writeInt(offset);
@@ -427,13 +488,13 @@ public class JpegOutputSet {
 			outputStream.writeInt(e.getComponentCount());
 
 			//write offset
-			if( (tagNumber[0] & 0xFF) == 0xa0 && (tagNumber[1] & 0xFF) == 0x05 ) { //write Interoperability offset
+			if( (tagNumber[0] & 0xFF) == 0xA0 && (tagNumber[1] & 0xFF) == 0x05 ) { //write Interoperability offset
 				
 				int offset = HEADER;
 				
-				//calculate offset to GPS
+				//calculate offset to interoperability offset
 				LinkedList<Entry> ifd0 = exif.getIfd0();
-				if(ifd0 != null) {
+				if( ifd0 != null ) {
 					offset += getEntrySize(ifd0);
 					offset += getEntryDataSize(ifd0);
 				}
@@ -442,9 +503,15 @@ public class JpegOutputSet {
 				offset += getEntryDataSize(sub_ifd);
 
 				LinkedList<Entry> ifd1 = exif.getIfd1();
-				if(ifd1 != null) {
+				if( ifd1 != null ) {
 					offset += getEntrySize(ifd1);
 					offset += getEntryDataSize(ifd1);
+				}
+				
+				LinkedList<Entry> gps = exif.getGpsIfd();
+				if( gps != null ) {
+					offset += getEntrySize(gps);
+					offset += getEntryDataSize(gps);
 				}
 				
 				outputStream.writeInt(offset);
@@ -682,6 +749,12 @@ public class JpegOutputSet {
 		if(gps_ifd != null)	{
 			size += getEntrySize(gps_ifd);
 			size += getEntryDataSize(gps_ifd);
+		}
+		
+		LinkedList<Entry> interoperability_ifd = exif.getInterIfd();
+		if(interoperability_ifd != null)	{
+			size += getEntrySize(interoperability_ifd);
+			size += getEntryDataSize(interoperability_ifd);
 		}
 
 		if(thumbnail != null)
