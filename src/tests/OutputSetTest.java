@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import jpeg.Entry;
 import jpeg.Jpeg;
 import jpeg.JpegOutputSet;
+import jpeg.NotJpegException;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
@@ -59,7 +60,7 @@ public class OutputSetTest {
 	}
 
 	//Analyze difference between resources and output
-	private void analyzeOutput(File f1, File f2) throws IOException
+	private void analyzeOutput(File f1, File f2) throws IOException, NotJpegException
 	{
 		Jpeg jpeg1 = new Jpeg(f1);
 		Jpeg jpeg2 = new Jpeg(f2);

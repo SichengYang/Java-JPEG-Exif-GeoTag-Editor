@@ -22,7 +22,7 @@ public class Jpeg
 
 	//Post: read jpeg file and divide data area into jfif.
 	//Throw: IOException if the file contains wrong or unreadable information
-	public Jpeg(File f) throws IOException
+	public Jpeg(File f) throws IOException, NotJpegException
 	{
 		BufferedInputStream buff = new BufferedInputStream(new FileInputStream (f));
 
@@ -31,27 +31,25 @@ public class Jpeg
 		buff.read(file_marker);
 
 		//check the file type
-		if( (file_marker[0] & 0xFF) == 0xFF && (file_marker[1] & 0xFF) == 0xD8 )
-		{
-			byte[] segment = readSegment(buff);
-			if ( (segment[0] & 0xFF) == 0xFF && (segment[1] & 0xFF) == 0xE0 )
-			{
-				jfif = segment;
-				byte[] exif_segment = readSegment(buff); 
-				process_exif(exif_segment);
-			}
-			else if ( (segment[0] & 0xFF) == 0xFF && (segment[1] & 0xFF) == 0xE1 )
-				process_exif(segment);
-			else throw new IOException("Error on reading exif segment");
-		}
-		else {
+		if( !((file_marker[0] & 0xFF) == 0xFF && (file_marker[1] & 0xFF) == 0xD8) ) {
 			buff.close();
-			throw new IOException(f.getName() + " is not a jpeg/jpg file");
+			throw new NotJpegException(f.getName() + " is not a jpeg/jpg file");
 		}
-
-		exif = new JpegExif(exif_data);
-		thumbnail = exif.getThumbnail();
-
+		
+		//process first 2 segments to find potential JFIF and EXIF segment.
+		for(int i=0; i<2; i++) {
+			byte[] segment = readSegment(buff);
+			if ( (segment[0] & 0xFF) == 0xFF && (segment[1] & 0xFF) == 0xE0 ) // FFE0 means we find a JFIF segment
+				jfif = segment;
+			else if ( (segment[0] & 0xFF) == 0xFF && (segment[1] & 0xFF) == 0xE1 ) { //FFE1 means we find a EXIF segment
+				process_exif(segment);
+				exif = new JpegExif(exif_data);
+				thumbnail = exif.getThumbnail();
+			}
+			else 
+				remain_segment.add(segment);
+		}
+		
 		//finish remianing segment reading
 		not_finish_segment_reading = true;
 		while (not_finish_segment_reading) {

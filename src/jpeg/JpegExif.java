@@ -34,7 +34,19 @@ public class JpegExif {
 	private static final int SHORT_SIZE = 2;
 	private static final int LONG_SIZE = 4;
 	private static final int[] DATA_SIZE = {1, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
-
+	
+	//Post: everything is set to null.
+	public JpegExif()
+	{
+		gps_entry = null;
+		ifd0= null;
+		sub_ifd= null;
+		ifd1 = null;
+		interoperability_ifd = null;
+		thumbnail = null;
+	}
+	
+	//Post: read exif data and assign to associate data fields.
 	public JpegExif(byte[] exif) throws IOException
 	{		
 		if(exif == null)
@@ -47,7 +59,8 @@ public class JpegExif {
 			bigEndian = true;
 		else if( (char)exif[position] == 'I' && (char)exif[position+1] == 'I' )
 			bigEndian = false;
-		else throw new IOException("Error endian information");
+		else
+			return; //This means image does not have EXIF data
 		position += 2;
 
 		//check tag mark

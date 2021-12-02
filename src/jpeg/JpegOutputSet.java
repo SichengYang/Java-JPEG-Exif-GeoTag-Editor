@@ -28,7 +28,7 @@ public class JpegOutputSet {
 	}
 
 	//Output: file output would be a jpeg with updated geotag
-	public boolean updateGeoTag(File output, double latitude, double longitude)
+	public boolean updateGeoTag(File output, double latitude, double longitude) throws IOException
 	{
 		removeGeoTag();
 		updateGeoTag(latitude, longitude);
@@ -36,7 +36,7 @@ public class JpegOutputSet {
 	}
 
 	//Output: file output would be a jpeg with geotag removed
-	public boolean removeGeoTag(File output)
+	public boolean removeGeoTag(File output) throws IOException
 	{
 		removeGeoTag();
 		return write(output);
@@ -128,8 +128,13 @@ public class JpegOutputSet {
 		Entry longitude_data_entry = new Entry(longitude_data_tag, VALUE_DATA_TYPE, 
 				VALUE_COMPONENT_COUNT, (Object)longitude_data,
 				longitude_data_offset);
-
-		LinkedList<Entry> gps = exif.getGpsIfd();
+		
+		LinkedList<Entry> gps = null;
+		//if there is no exif available, the program will create one
+		if(exif != null)
+			gps = exif.getGpsIfd();
+		else 
+			exif = new JpegExif();
 
 		if(gps == null) {
 			//create GPS IFD if it does not present in resources file
@@ -154,6 +159,7 @@ public class JpegOutputSet {
 			ifd0.add(gps_pointer);
 		}
 		
+		//add GPS data to GPS IFD
 		gps.addFirst(longitude_data_entry);
 		gps.addFirst(longitude_ref_entry);
 		gps.addFirst(latitude_data_entry);
@@ -165,6 +171,9 @@ public class JpegOutputSet {
 	//Return: true if geotag is successfully removed
 	private boolean removeGeoTag()
 	{
+		if(exif == null)
+			return true;
+		
 		//Get GPS data
 		LinkedList<Entry> gps = exif.getGpsIfd();
 
@@ -197,36 +206,31 @@ public class JpegOutputSet {
 	}
 
 	//Output: a jpeg is written based on the information in outpu set
-	private boolean write(File output)
+	private boolean write(File output) throws IOException
 	{
-		try {
-			DataOutputStream outputStream = new DataOutputStream (new BufferedOutputStream (new FileOutputStream(output)));
+		DataOutputStream outputStream = new DataOutputStream (new BufferedOutputStream (new FileOutputStream(output)));
 
-			//write header
-			final byte[] header = {(byte)0xFF, (byte)0xD8};
-			outputStream.write(header);
+		//write header
+		final byte[] header = {(byte)0xFF, (byte)0xD8};
+		outputStream.write(header);
 
-			//write jfif
-			if(jfif != null)
-				outputStream.write(jfif);
+		//write jfif
+		if(jfif != null)
+			outputStream.write(jfif);
 
-			//write exif
+		//write exif
+		if(exif != null)
 			writeExif(outputStream);
 
-			//write other segment
-			for(byte[] segment : remain_segment)
-				outputStream.write(segment);
+		//write other segment
+		for(byte[] segment : remain_segment)
+			outputStream.write(segment);
 
-			//write data after start of scan
-			outputStream.write(compressed_data);
+		//write data after start of scan
+		outputStream.write(compressed_data);
 
-			outputStream.close();
-			return true;
-		} catch (Exception e) {
-			output.delete();
-			e.printStackTrace();
-			return false;
-		}
+		outputStream.close();
+		return true;
 	}
 
 	//Output: exif segment in associate buffered output stream
@@ -722,6 +726,10 @@ public class JpegOutputSet {
 	//Return: the size of exif segment
 	private int getExifSize()
 	{
+		//if exif does not exit
+		if(exif == null)
+			return 0;
+		
 		//size of each part
 		final int HEADER = 16;
 

@@ -1,10 +1,11 @@
 import java.io.*;
 import jpeg.JpegOutputSet;
+import jpeg.NotJpegException;
 import jpeg.Jpeg;
 
 public class App
 {
-	public static void main(String[] args) throws FileNotFoundException, IOException
+	public static void main(String[] args) throws FileNotFoundException, IOException, NotJpegException
 	{
 		double latitude = 50.0 + 30.0 / 60 + 55.77 / 3600;
 		double longitude = 100.0 + 50.0 / 60 + 10.8 / 3600;
@@ -19,21 +20,20 @@ public class App
 		
 		File resource = new File("./assets");
 		
-		
 		for(File f : resource.listFiles()) {
 			if(f.isFile()) {
 				try {
-				File output = new File("./assets/remove/" + f.getName());
-				Jpeg jpeg = new Jpeg(f);
-				JpegOutputSet outputSet = new JpegOutputSet(jpeg);
-				if (outputSet.removeGeoTag(output))
+					File output = new File("./assets/remove/" + f.getName());
+					Jpeg jpeg = new Jpeg(f);
+					JpegOutputSet outputSet = new JpegOutputSet(jpeg);	
+					if (outputSet.removeGeoTag(output))
 					System.out.println("Remove " + f.getName());
-				} catch (Exception e) {
-					System.out.println("Failed to remove " + f.getName() + " because of " + e);
+				} catch (NotJpegException e) {
+					System.out.println(f.getName() + " is not a jpeg");
 				}
 			}
 		}
-		
+
 		for(File f : resource.listFiles()) {
 			if(f.isFile()) {
 				try {
@@ -42,13 +42,13 @@ public class App
 					JpegOutputSet outputSet = new JpegOutputSet(jpeg);
 					if (outputSet.updateGeoTag(output, latitude, longitude))
 						System.out.println("Update " + f.getName());
-				} catch (Exception e) {
-					System.out.println("Failed to update " + f.getName() + " because of " + e);
+				} catch (NotJpegException e) {
+					System.out.println(f.getName() + " is not a jpeg");
 				}
 			}
 		}
 		
-		Jpeg jpeg = new Jpeg(new File("./assets/update/New_Chair_2021.jpg"));
+		Jpeg jpeg = new Jpeg(new File("./assets/update/no_exif.jpg"));
 		jpeg.exif.print();
 		
 	}
