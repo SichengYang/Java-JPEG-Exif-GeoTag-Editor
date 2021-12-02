@@ -2,7 +2,7 @@
 ***
 
 ## Description
-- This is a Java library that can let user scan the JPEG exif and report all tags.
+- This is a Java library that can let user scan the JPEG exif, report all tags, and change or remove geotag.
 
 ## Functions:
 - This library can scan the exif data and report to users.
