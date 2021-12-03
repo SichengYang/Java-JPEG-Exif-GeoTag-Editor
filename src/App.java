@@ -27,7 +27,7 @@ public class App
 					Jpeg jpeg = new Jpeg(f);
 					JpegOutputSet outputSet = new JpegOutputSet(jpeg);	
 					if (outputSet.removeGeoTag(output))
-					System.out.println("Remove " + f.getName());
+						System.out.println("Remove " + f.getName());
 				} catch (NotJpegException e) {
 					System.out.println(f.getName() + " is not a jpeg");
 				}
@@ -47,9 +47,5 @@ public class App
 				}
 			}
 		}
-		
-		Jpeg jpeg = new Jpeg(new File("./assets/update/no_exif.jpg"));
-		jpeg.exif.print();
-		
 	}
 }

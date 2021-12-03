@@ -15,7 +15,6 @@ public class JpegExifTest {
 			exif = jpeg.exif;
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-
 		}
 
 		if(exif != null) {

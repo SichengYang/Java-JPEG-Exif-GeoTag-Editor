@@ -57,16 +57,6 @@ public class BigEndian
 		return signed_short;
 	}
 
-	//Return: a 2 byte array which represent a integer value
-	public static byte[] getIntTwoByteValue(int integer)
-	{
-		byte[] result = new byte[2];
-		result[1] = (byte)(integer & 0xFF);
-		integer = integer >> 8;
-		result[0] = (byte)(integer & 0xFF);
-		return result;
-	}
-
 	//Helper function of getInt32
 	public static int getInt32(byte[] value)
 	{
