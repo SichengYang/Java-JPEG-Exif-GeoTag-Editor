@@ -23,13 +23,13 @@ public class OutputSetTest {
 		double latitude = 50.0 + 30.0 / 60 + 55.77 / 3600;
 		double longitude = 100.0 + 50.0 / 60 + 10.8 / 3600;
 		
-		File remove_results = new File("./assets/remove");
-		if(!remove_results.exists())
-			remove_results.mkdir();
+		File removeResults = new File("./assets/remove");
+		if(!removeResults.exists())
+			removeResults.mkdir();
 		
-		File update_results = new File("./assets/update");
-		if(!update_results.exists())
-			update_results.mkdir();
+		File updateResults = new File("./assets/update");
+		if(!updateResults.exists())
+			updateResults.mkdir();
 		
 		File resource = new File("./assets");
 
@@ -76,22 +76,22 @@ public class OutputSetTest {
 			gps = exif.getGpsIfd();
 			
 			if(gps != null) {
-				Entry gps_tag = new Entry();
+				Entry gpsTag = new Entry();
 				byte[] tag = {0x00, 0x01};
-				gps_tag.setTagNumber(tag);
-				assertEquals(false, gps.contains(gps_tag));
+				gpsTag.setTagNumber(tag);
+				assertEquals(false, gps.contains(gpsTag));
 				
 				tag[1] = 0x02;
-				gps_tag.setTagNumber(tag);
-				assertEquals(false, gps.contains(gps_tag));
+				gpsTag.setTagNumber(tag);
+				assertEquals(false, gps.contains(gpsTag));
 
 				tag[1] = 0x03;
-				gps_tag.setTagNumber(tag);
-				assertEquals(false, gps.contains(gps_tag));
+				gpsTag.setTagNumber(tag);
+				assertEquals(false, gps.contains(gpsTag));
 
 				tag[1] = 0x04;
-				gps_tag.setTagNumber(tag);
-				assertEquals(false, gps.contains(gps_tag));
+				gpsTag.setTagNumber(tag);
+				assertEquals(false, gps.contains(gpsTag));
 			}
 		}
 	}
@@ -122,11 +122,11 @@ public class OutputSetTest {
 			checkIfd0(ifd0_1, ifd0_2);
 		
 		//compare sub_ifd result
-		LinkedList<Entry> sub_ifd_1 = exif1.getSubIfd();
-		LinkedList<Entry> sub_ifd_2 = exif2.getSubIfd();
+		LinkedList<Entry> subIfd_1 = exif1.getSubIfd();
+		LinkedList<Entry> subIfd_2 = exif2.getSubIfd();
 		
-		if(sub_ifd_1 != null)
-			checkSubIfd(sub_ifd_1, sub_ifd_2);
+		if(subIfd_1 != null)
+			checkSubIfd(subIfd_1, subIfd_2);
 		
 		//compare IFD 1 result
 		LinkedList<Entry> ifd1_1 = exif1.getIfd1();
@@ -175,13 +175,13 @@ public class OutputSetTest {
 	}
 
 	//Post: checking value in sub ifd using JUnit
-	private void checkSubIfd(LinkedList<Entry> sub_ifd_1, LinkedList<Entry> sub_ifd_2)
+	private void checkSubIfd(LinkedList<Entry> subIfd_1, LinkedList<Entry> subIfd_2)
 	{
-		assertEquals(sub_ifd_1.size(), sub_ifd_2.size());
+		assertEquals(subIfd_1.size(), subIfd_2.size());
 		
-		for(int i=0; i<sub_ifd_1.size(); i++) {
-			Entry e1 = sub_ifd_1.remove();
-			Entry e2 = sub_ifd_2.remove();
+		for(int i=0; i<subIfd_1.size(); i++) {
+			Entry e1 = subIfd_1.remove();
+			Entry e2 = subIfd_2.remove();
 			assertEquals(true, e1.equals(e2));
 		}
 	}

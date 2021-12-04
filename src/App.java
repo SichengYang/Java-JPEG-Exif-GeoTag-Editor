@@ -1,5 +1,4 @@
 import java.io.*;
-import java.util.Scanner;
 
 import jpeg.JpegOutputSet;
 import jpeg.NotJpegException;
@@ -7,18 +6,18 @@ import jpeg.Jpeg;
 
 public class App
 {
-	public static void main(String[] args) throws FileNotFoundException, IOException, NotJpegException
+	public static void main(String[] args) throws IOException, NotJpegException
 	{
 		double latitude = 50.0 + 30.0 / 60 + 55.77 / 3600;
 		double longitude = 100.0 + 50.0 / 60 + 10.8 / 3600;
 
-		File remove_results = new File("./assets/remove");
-		if(!remove_results.exists())
-			remove_results.mkdir();
+		File removeResults = new File("./assets/remove");
+		if(!removeResults.exists())
+			removeResults.mkdir();
 		
-		File update_results = new File("./assets/update");
-		if(!update_results.exists())
-			update_results.mkdir();
+		File updateResults = new File("./assets/update");
+		if(!updateResults.exists())
+			updateResults.mkdir();
 		
 		File resource = new File("./assets");
 		
