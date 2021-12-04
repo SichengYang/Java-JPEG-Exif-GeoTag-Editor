@@ -17,7 +17,8 @@ public class Jpeg
 	public Thumbnail thumbnail;
 
 	private boolean not_finish_segment_reading;
-
+	private boolean hasReadExif;
+	private boolean hasReadJfif;
 	private final int HEADER_SIZE = 10;
 
 	//Post: read jpeg file and divide data area into jfif.
@@ -36,15 +37,21 @@ public class Jpeg
 			throw new NotJpegException(f.getName() + " is not a jpeg/jpg file");
 		}
 		
+		hasReadExif = false;
+		hasReadJfif = false;
+
 		//process first 2 segments to find potential JFIF and EXIF segment.
 		for(int i=0; i<2; i++) {
 			byte[] segment = readSegment(buff);
-			if ( (segment[0] & 0xFF) == 0xFF && (segment[1] & 0xFF) == 0xE0 ) // FFE0 means we find a JFIF segment
-				jfif = segment;
-			else if ( (segment[0] & 0xFF) == 0xFF && (segment[1] & 0xFF) == 0xE1 ) { //FFE1 means we find a EXIF segment
-				process_exif(segment);
-				exif = new JpegExif(exif_data);
-				thumbnail = exif.getThumbnail();
+			if ( (segment[0] & 0xFF) == 0xFF && (segment[1] & 0xFF) == 0xE0 && !hasReadJfif) {// FFE0 means we find a JFIF segment
+					jfif = segment;
+					hasReadJfif = true;
+			}
+			else if ( (segment[0] & 0xFF) == 0xFF && (segment[1] & 0xFF) == 0xE1 && !hasReadExif) { //FFE1 means we find a EXIF segment
+					process_exif(segment);
+					exif = new JpegExif(exif_data);
+					thumbnail = exif.getThumbnail();
+					hasReadExif = true;
 			}
 			else 
 				remain_segment.add(segment);
@@ -82,6 +89,7 @@ public class Jpeg
 	//Post: exif segment is divided into marker and content.
 	private void process_exif(byte[] exif_segment)
 	{	
+		System.out.println(1);
 		//copy the marker part
 		exif_marker = new byte[HEADER_SIZE];
 		exif_data = new byte[exif_segment.length - HEADER_SIZE];
@@ -95,13 +103,13 @@ public class Jpeg
 	private byte[] readSegment (BufferedInputStream f) throws IOException
 	{
 		//mark the segment location
-		f.mark(f.available());
 		byte[] header = new byte[2];
 		f.read(header);
 
 		byte[] size_data = new byte[2];
 		f.read(size_data);
 		int size = BigEndian.getInt16(size_data[0], size_data[1]);
+		System.out.println(size);
 
 		if( (header[0] & 0xFF) == 0xFF ) {
 			if( (header[1] & 0xFF) == 0xDA )
@@ -117,7 +125,7 @@ public class Jpeg
 		content[2] = size_data[0];
 		content[3] = size_data[1];
 		for(int i=4; i<size+2; i++)
-			content[i] = (byte)(f.read());
+			content[i] = (byte)f.read();
 
 		return content;		
 	}

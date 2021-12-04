@@ -2,10 +2,13 @@ package tests;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import jpeg.Entry;
 import jpeg.Jpeg;
+import jpeg.JpegExif;
 import jpeg.JpegOutputSet;
 import jpeg.NotJpegException;
 
@@ -15,7 +18,7 @@ import org.junit.Test;
 public class OutputSetTest {
 	
 	@Test
-	public void OutputSetTest() throws IOException
+	public void OutputSetTest() throws IOException, NotJpegException
 	{
 		double latitude = 50.0 + 30.0 / 60 + 55.77 / 3600;
 		double longitude = 100.0 + 50.0 / 60 + 10.8 / 3600;
@@ -36,8 +39,10 @@ public class OutputSetTest {
 					File output = new File("./assets/remove/" + f.getName());
 					Jpeg jpeg = new Jpeg(f);
 					JpegOutputSet outputSet = new JpegOutputSet(jpeg);
-					if (outputSet.removeGeoTag(output))
+					if (outputSet.removeGeoTag(output)) {
+						testRemoveGeoTag(output);
 						analyzeOutput(f, output);
+					}
 				}
 			} catch (Exception e) {
 				System.err.println("Failed to remove " + f.getName() + " because " + e.getMessage());
@@ -58,6 +63,38 @@ public class OutputSetTest {
 			}
 		}
 	}
+	
+	//Analyze whether geotag in image is removed
+	public void testRemoveGeoTag(File output) throws IOException, NotJpegException
+	{
+		Jpeg jpeg = new Jpeg(output);
+		
+		JpegExif exif = jpeg.exif;
+		LinkedList<Entry> gps = null;
+		
+		if(exif != null) {
+			gps = exif.getGpsIfd();
+			
+			if(gps != null) {
+				Entry gps_tag = new Entry();
+				byte[] tag = {0x00, 0x01};
+				gps_tag.setTagNumber(tag);
+				assertEquals(false, gps.contains(gps_tag));
+				
+				tag[1] = 0x02;
+				gps_tag.setTagNumber(tag);
+				assertEquals(false, gps.contains(gps_tag));
+
+				tag[1] = 0x03;
+				gps_tag.setTagNumber(tag);
+				assertEquals(false, gps.contains(gps_tag));
+
+				tag[1] = 0x04;
+				gps_tag.setTagNumber(tag);
+				assertEquals(false, gps.contains(gps_tag));
+			}
+		}
+	}
 
 	//Analyze difference between resources and output
 	private void analyzeOutput(File f1, File f2) throws IOException, NotJpegException
@@ -65,35 +102,47 @@ public class OutputSetTest {
 		Jpeg jpeg1 = new Jpeg(f1);
 		Jpeg jpeg2 = new Jpeg(f2);
 		
+		JpegExif exif1 = jpeg1.exif;
+		JpegExif exif2 = jpeg2.exif;
+		
+		if( exif1 == null && exif2 == null )
+			return;
+		
+		//avoid null pointer issue.
+		if( exif1 == null )
+			exif1 = new JpegExif();
+		if( exif2 == null )
+			exif2 = new JpegExif();
+		
 		//check ifd 0
-		LinkedList<Entry> ifd0_1 = jpeg1.exif.getIfd0();
-		LinkedList<Entry> ifd0_2 = jpeg2.exif.getIfd0();
+		LinkedList<Entry> ifd0_1 = exif1.getIfd0();
+		LinkedList<Entry> ifd0_2 = exif2.getIfd0();
 		
 		if(ifd0_1 != null)
 			checkIfd0(ifd0_1, ifd0_2);
 		
 		//compare sub_ifd result
-		LinkedList<Entry> sub_ifd_1 = jpeg1.exif.getSubIfd();
-		LinkedList<Entry> sub_ifd_2 = jpeg2.exif.getSubIfd();
+		LinkedList<Entry> sub_ifd_1 = exif1.getSubIfd();
+		LinkedList<Entry> sub_ifd_2 = exif2.getSubIfd();
 		
 		if(sub_ifd_1 != null)
 			checkSubIfd(sub_ifd_1, sub_ifd_2);
 		
 		//compare IFD 1 result
-		LinkedList<Entry> ifd1_1 = jpeg1.exif.getIfd1();
-		LinkedList<Entry> ifd1_2 = jpeg2.exif.getIfd1();
+		LinkedList<Entry> ifd1_1 = exif1.getIfd1();
+		LinkedList<Entry> ifd1_2 = exif2.getIfd1();
 		
 		if(ifd1_1 != null)
 			checkIfd1(ifd1_1, ifd1_2);
 		
-		LinkedList<Entry> gps1 = jpeg1.exif.getGpsIfd();
-		LinkedList<Entry> gps2 = jpeg2.exif.getGpsIfd();
+		LinkedList<Entry> gps1 = exif1.getGpsIfd();
+		LinkedList<Entry> gps2 = exif2.getGpsIfd();
 		
 		if(gps1 != null)
 			checkGps(gps1, gps2);
 		
-		LinkedList<Entry> inter1 = jpeg1.exif.getInterIfd();
-		LinkedList<Entry> inter2 = jpeg2.exif.getInterIfd();
+		LinkedList<Entry> inter1 = exif1.getInterIfd();
+		LinkedList<Entry> inter2 = exif2.getInterIfd();
 		
 		if(inter1 != null)
 			checkInter(inter1, inter2);

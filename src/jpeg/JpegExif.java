@@ -214,8 +214,9 @@ public class JpegExif {
 	private Entry[] read_ifd (byte[] exif)
 	{
 		byte[] entry_count_info = new byte[2];
+		
 		for(int i=0; i<2; i++)
-			entry_count_info[i] = exif[position+i];
+			entry_count_info[i] = exif[position + i];
 		int entry_count = getInt16(entry_count_info);
 		position += 2;
 

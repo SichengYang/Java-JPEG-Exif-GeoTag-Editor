@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.Scanner;
+
 import jpeg.JpegOutputSet;
 import jpeg.NotJpegException;
 import jpeg.Jpeg;
@@ -9,7 +11,7 @@ public class App
 	{
 		double latitude = 50.0 + 30.0 / 60 + 55.77 / 3600;
 		double longitude = 100.0 + 50.0 / 60 + 10.8 / 3600;
-		
+
 		File remove_results = new File("./assets/remove");
 		if(!remove_results.exists())
 			remove_results.mkdir();
