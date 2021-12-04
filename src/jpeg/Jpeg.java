@@ -89,7 +89,6 @@ public class Jpeg
 	//Post: exif segment is divided into marker and content.
 	private void process_exif(byte[] exif_segment)
 	{	
-		System.out.println(1);
 		//copy the marker part
 		exif_marker = new byte[HEADER_SIZE];
 		exif_data = new byte[exif_segment.length - HEADER_SIZE];
@@ -109,7 +108,6 @@ public class Jpeg
 		byte[] size_data = new byte[2];
 		f.read(size_data);
 		int size = BigEndian.getInt16(size_data[0], size_data[1]);
-		System.out.println(size);
 
 		if( (header[0] & 0xFF) == 0xFF ) {
 			if( (header[1] & 0xFF) == 0xDA )
