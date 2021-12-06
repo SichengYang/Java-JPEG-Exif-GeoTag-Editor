@@ -3,6 +3,11 @@ package jpeg;
 import java.io.*;
 import java.util.*;
 
+/*
+	JpegOutputSet is the output routine. To create a JpegOutputSet, the user should pass  Jpeg object
+	to the constructor. This output rontine offers removeGeotag() and updateGeotag().
+*/
+
 public class JpegOutputSet {
 	private byte[] jfif;
 	private LinkedList<byte[]> remainSegment = new LinkedList<byte[]>();

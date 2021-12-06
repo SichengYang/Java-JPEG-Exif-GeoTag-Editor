@@ -2,6 +2,10 @@ package jpeg;
 
 import java.io.*;
 
+/*
+	This is an object that stores information of thumbnail image.
+*/
+
 public class Thumbnail {
 
 	private int thumbnailFormat;

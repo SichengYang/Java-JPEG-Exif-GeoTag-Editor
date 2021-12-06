@@ -5,6 +5,11 @@ import java.util.LinkedList;
 
 import endian.BigEndian;
 
+/*
+	Jpeg class is used to store all information of a jpeg file. It contains all structures of a jpeg.
+	If user want to use OutputSet, it is required to create a Jpeg before creating OutputSet
+*/
+
 public class Jpeg
 {
 	public byte[] jfif;
@@ -103,7 +108,6 @@ public class Jpeg
 	//Return: a byte array which contains an segment
 	private byte[] readSegment (BufferedInputStream f) throws IOException
 	{
-		//mark the segment location
 		byte[] header = new byte[2];
 		f.read(header);
 

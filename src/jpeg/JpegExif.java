@@ -7,6 +7,11 @@ import java.util.*;
 import endian.BigEndian;
 import endian.SmallEndian;
 
+/*
+	JpegExif will process a byte[] exif data and gather the informaton.
+	User can access JpegExif through class Jpeg.
+*/
+
 public class JpegExif {
 
 	private boolean bigEndian;
