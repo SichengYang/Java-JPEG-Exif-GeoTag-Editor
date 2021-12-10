@@ -2,7 +2,7 @@
 	class SmallEndian contains some useful methods to deal with small endian calculation
  */
 
-package lib.endian;
+package endian;
 
 public class LittleEndian
 {

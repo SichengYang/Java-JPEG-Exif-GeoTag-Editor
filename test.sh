@@ -1,2 +1,0 @@
-javac -d ./bin -cp .:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar */*.java */*/*.java
-java -cp .:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar:./bin/tests/BigEndianTest.class tests/BigEndianTestRunner

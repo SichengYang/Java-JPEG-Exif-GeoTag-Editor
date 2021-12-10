@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import endian.SmallEndian;
+import endian.LittleEndian;
 
 public class SmallEndianTest {
 	
