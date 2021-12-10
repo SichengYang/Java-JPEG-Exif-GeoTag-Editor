@@ -1,11 +1,11 @@
-package jpeg;
+package lib.jpeg;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import endian.BigEndian;
-import endian.SmallEndian;
+import lib.endian.BigEndian;
+import lib.endian.LittleEndian;
 
 /*
 	JpegExif will process a byte[] exif data and gather the informaton.
@@ -450,14 +450,14 @@ public class JpegExif {
 				byte[] shortValue = new byte[2];
 				shortValue[0] = value[0];
 				shortValue[1] = value[1];
-				return bigEndian ? BigEndian.getSignedShort(shortValue) : SmallEndian.getSignedShort(shortValue);
+				return bigEndian ? BigEndian.getSignedShort(shortValue) : LittleEndian.getSignedShort(shortValue);
 			} else {
 				short[] result = new short[size/SHORT_SIZE];
 				for(int i=0; i < size / SHORT_SIZE ; i++) {
 					byte[] shortValue = new byte[2];
 					shortValue[0] = value[2 * i];
 					shortValue[1] = value[2 * i + 1];
-					result[i] = bigEndian ? BigEndian.getSignedShort(shortValue) : SmallEndian.getSignedShort(shortValue);
+					result[i] = bigEndian ? BigEndian.getSignedShort(shortValue) : LittleEndian.getSignedShort(shortValue);
 				}
 				return result;
 			}
@@ -559,18 +559,18 @@ public class JpegExif {
 	//Return: an signed int which 4 bytes represent.
 	private int getInt32(byte[] value)
 	{
-		return bigEndian ? BigEndian.getInt32(value) : SmallEndian.getInt32(value);
+		return bigEndian ? BigEndian.getInt32(value) : LittleEndian.getInt32(value);
 	}
 
 	//Return: a long which 4 bytes represent 
 	private long getLong32(byte[] value)
 	{
-		return bigEndian ? BigEndian.getLong32(value) : SmallEndian.getLong32(value);
+		return bigEndian ? BigEndian.getLong32(value) : LittleEndian.getLong32(value);
 	}
 
 	//Return: an int which 2 bytes represent
 	private int getInt16(byte[] value)
 	{
-		return bigEndian ? BigEndian.getInt16(value) : SmallEndian.getInt16(value);
+		return bigEndian ? BigEndian.getInt16(value) : LittleEndian.getInt16(value);
 	}
 }

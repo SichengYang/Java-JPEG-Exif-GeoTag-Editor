@@ -2,9 +2,9 @@
 	class SmallEndian contains some useful methods to deal with small endian calculation
  */
 
-package endian;
+package lib.endian;
 
-public class SmallEndian
+public class LittleEndian
 {
 	//Pre: this returned unsigned integer is small endian version
 	//Return: an int represent a unsigned 16 bit int.
