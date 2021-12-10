@@ -16,9 +16,9 @@ public class SmallEndianTest {
 		byte data3 = (byte)(0xA0);
 		byte data4 = (byte)(0x0A);
 
-		assertEquals(178262000, SmallEndian.getLong32(data1, data2, data3, data4));
-		assertEquals(4080, SmallEndian.getInt16(data1, data2));
-		assertEquals(178262000, SmallEndian.getInt32(data1, data2, data3, data4));
-		assertEquals(4080, SmallEndian.getSignedShort(data1, data2));
+		assertEquals(178262000, LittleEndian.getLong32(data1, data2, data3, data4));
+		assertEquals(4080, LittleEndian.getInt16(data1, data2));
+		assertEquals(178262000, LittleEndian.getInt32(data1, data2, data3, data4));
+		assertEquals(4080, LittleEndian.getSignedShort(data1, data2));
 	}
 }
