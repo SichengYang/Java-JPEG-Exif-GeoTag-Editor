@@ -14,7 +14,7 @@ git clone https://github.com/SichengYang/Java-Exif-Editor.git
 ```
 ## Compile Instruction
 ```
-javac -d bin -cp .:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar *.java */*.java
+javac -d bin -cp .:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar */*.java */*/*.java
 ```
 ## Running Instruction
 - Run App or Tool
@@ -29,10 +29,9 @@ java -cp .:bin:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar tests.<a test 
 ## Tool Command Instruction
 command type:
 
--m remove for remove geotag, update for update geotag, 
-	 verify for verify whether file is a jpeg, and print to print geotag (required)
+-m remove for remove geotag, update for update geotag, verify for verify whether file is a jpeg, and print to print geotag (required)
  
--i name of input file or folder in assets folder (required)
+-i name of input file or folder in assets folder. It could also be "." means process all images under assets (required)
   
 -la latitude as a String (required when you select to update geotag)
   
@@ -81,6 +80,7 @@ command type:
 
 ## Sample Usage
 - <a href="https://github.com/SichengYang/Java-JPEG-GeoTag-Editor/blob/main/src/App.java">App.java under src</a>
+- <a href="https://github.com/SichengYang/Java-JPEG-GeoTag-Editor/blob/main/src/Tool.java">Tool.java under src</a>
 
 ## Import Guide
 - import jpeg.*;
