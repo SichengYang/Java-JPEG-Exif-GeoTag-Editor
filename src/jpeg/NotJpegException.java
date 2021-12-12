@@ -11,5 +11,4 @@ public class NotJpegException extends Exception {
 	public NotJpegException(String message) {
 		super(message);
 	}
-
 }

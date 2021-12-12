@@ -159,12 +159,9 @@ public class Entry
 	//Return: true if both Entry contains same tag number; false otherwise.
 	public boolean equals(Object obj)
 	{
-		if( obj instanceof Entry ) {
-			Entry entry = (Entry)obj;
-
+		if( obj instanceof Entry entry) {
 			//compare tagNumber
-			boolean sameTag = tagNumber[0] == entry.getTagNumber()[0] && tagNumber[1] == entry.getTagNumber()[1];
-			return sameTag;
+			return tagNumber[0] == entry.getTagNumber()[0] && tagNumber[1] == entry.getTagNumber()[1];
 		}
 		else
 			return false;
@@ -179,22 +176,24 @@ public class Entry
 	//Return: a String that represent the Directory. Format: tag number: **, data format: **, componentCount: **, offset value: **, value: **
 	public String toString()
 	{
-		String result =  new String("tag number: " + String.format( "%02x ", (tagNumber[0] & 0xFF) ) + String.format( "%02x", (tagNumber[1] & 0xFF) ) +
+		String result =  new String(
+				"tag number: " + String.format( "%02x ", (tagNumber[0] & 0xFF) ) + String.format( "%02x", (tagNumber[1] & 0xFF) ) +
 				" data format: " + String.format("%-2d", dataFormat) +
 				" component count: " + String.format("%-4d", componentCount) + 
 				" offset value: " + 
 				String.format( "%08x", BigEndian.getLong32(offset) ));
-		//check whether it is latitude and longitude and provide different print String.
+		
+		//check data format and provide different print String.
 		if(dataFormat == 5 || dataFormat == 10) {
-			int[] cast_value = (int[])value;
+			int[] castValue = (int[])value;
 			result += " value: ";
-			for (int i=0; i<cast_value.length/2; i++)
-				result += String.format("%d/%d:%.2f ", cast_value[2*i], cast_value[2*i+1], (double)cast_value[2*i]/cast_value[2*i+1] );
+			for (int i=0; i<castValue.length/2; i++)
+				result += String.format("%d/%d:%.2f ", castValue[2*i], castValue[2*i+1], (double)castValue[2*i]/castValue[2*i+1] );
 		} else if(dataFormat == 3 && value.getClass().isArray()) {
-			int[] cast_value = (int[])value;
+			int[] castValue = (int[])value;
 			result += " value: ";
-			for (int i=0; i<cast_value.length; i++)
-				result += cast_value[i] + " ";
+			for (int i=0; i<castValue.length; i++)
+				result += castValue[i] + " ";
 		}
 		else if(dataFormat == 7)
 		{
