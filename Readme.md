@@ -22,6 +22,8 @@ javac -d bin -cp .:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar */*.java *
 - Run App or Tool
 ```
 java -cp bin App
+```
+```
 java -cp bin Tool <command>
 ```
 - Run JUnit Test
