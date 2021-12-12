@@ -1,6 +1,7 @@
 package jpeg;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 import endian.BigEndian;
@@ -35,7 +36,10 @@ public class Jpeg
 
 		//read the marker to make sure it is a jpeg
 		byte[] fileMarker = new byte[2];
-		buff.read(fileMarker);
+		if (buff.read(fileMarker) == -1){
+			buff.close();
+			throw new IOException("File does not have enough data on marker");
+		}
 
 		//check the file type
 		if( !((fileMarker[0] & 0xFF) == 0xFF && (fileMarker[1] & 0xFF) == 0xD8) ) {
@@ -45,7 +49,7 @@ public class Jpeg
 		
 		notReadExif = true;
 		notReadJfif = true;
-		remainSegment = new LinkedList<byte[]>();
+		remainSegment = new LinkedList<>();
 		
 		//process first 2 segments to find potential JFIF and EXIF segment.
 		for(int i=0; i<2; i++) {
@@ -64,7 +68,7 @@ public class Jpeg
 				remainSegment.add(segment);
 		}
 		
-		//finish remianing segment reading
+		//finish remaining segment reading
 		notFinishSegmentReading = true;
 		while (notFinishSegmentReading) {
 			byte[] segment = readSegment(buff);
@@ -97,22 +101,20 @@ public class Jpeg
 	private void processExif(byte[] exifSegment)
 	{	
 		//copy the marker part
-		exifMarker = new byte[HEADER_SIZE];
-		exifData = new byte[exifSegment.length - HEADER_SIZE];
-		for(int i=0; i<HEADER_SIZE; i++)
-			exifMarker[i] = exifSegment[i];
-		for(int i=0; i<exifSegment.length - HEADER_SIZE; i++ )
-			exifData[i] = exifSegment[i + HEADER_SIZE];
+		exifMarker = Arrays.copyOfRange(exifSegment, 0, HEADER_SIZE);
+		exifData = Arrays.copyOfRange(exifSegment, HEADER_SIZE, exifSegment.length);
 	}
 
 	//Return: a byte array which contains an segment
 	private byte[] readSegment (BufferedInputStream f) throws IOException
 	{
 		byte[] header = new byte[2];
-		f.read(header);
+		if(f.read(header) == -1)
+			throw new IOException("There is not sufficient data on reading segment header");
 
 		byte[] sizeData = new byte[2];
-		f.read(sizeData);
+		if(f.read(sizeData) == -1)
+			throw new IOException("There is not sufficient data on reading segment size");
 		int size = BigEndian.getInt16(sizeData[0], sizeData[1]);
 
 		if( (header[0] & 0xFF) == 0xFF ) {

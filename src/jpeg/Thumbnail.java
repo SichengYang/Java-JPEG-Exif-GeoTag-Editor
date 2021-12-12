@@ -24,10 +24,10 @@ public class Thumbnail {
 
 		if( !( (thumbnailData[ thumbnailData.length-2 ] & 0xFF) == 0xFF && 
 			   (thumbnailData[ thumbnailData.length-1 ] & 0xFF) == 0xD9 ) )
-			throw new IOException("Error on thumbnial image ending bytes");
+			throw new IOException("Error on thumbnail image ending bytes");
 	}
 
-	//Return: thumbnial data is returned as a byte array
+	//Return: thumbnail data is returned as a byte array
 	public byte[] getThumbnailData()
 	{
 		return thumbnailData;

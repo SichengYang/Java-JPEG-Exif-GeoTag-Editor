@@ -5,16 +5,22 @@ import java.util.*;
 
 /*
 	JpegOutputSet is the output routine. To create a JpegOutputSet, the user should pass  Jpeg object
-	to the constructor. This output rontine offers removeGeotag() and updateGeotag().
+	to the constructor. This output routine offers removeGeotag() and updateGeotag().
 */
 
 public class JpegOutputSet {
 	private byte[] jfif;
-	private LinkedList<byte[]> remainSegment = new LinkedList<byte[]>();
+	private LinkedList<byte[]> remainSegment = new LinkedList<>();
 	private byte[] compressedData;
 
 	private JpegExif exif;
 	private Thumbnail thumbnail;
+
+	private int ifd0Size;
+	private int subIfdSize;
+	private int ifd1Size;
+	private int gpsIfdSize;
+	private int interIfdSize;
 
 	private static final int DATA_HEADER = 8;
 	private static final int NEXT_IFD_OFFSET = 4;
@@ -143,13 +149,13 @@ public class JpegOutputSet {
 
 		if(gps == null) {
 			//create GPS IFD if it does not present in resources file
-			gps = new LinkedList<Entry>();
+			gps = new LinkedList<>();
 			exif.setGpsIfd(gps);
 
 			//create pointer to GPS IFD
 			LinkedList<Entry> ifd0 = exif.getIfd0();
 			if(ifd0 == null) {
-				ifd0 = new LinkedList<Entry>();
+				ifd0 = new LinkedList<>();
 				exif.setIfd0(ifd0);
 			}
 
@@ -210,7 +216,7 @@ public class JpegOutputSet {
 		return true;
 	}
 
-	//Output: a jpeg is written based on the information in outpu set
+	//Output: a jpeg is written based on the information in output set
 	private boolean write(File output) throws IOException
 	{
 		DataOutputStream outputStream = new DataOutputStream (new BufferedOutputStream (new FileOutputStream(output)));
@@ -241,6 +247,8 @@ public class JpegOutputSet {
 	//Output: exif segment in associate buffered output stream
 	private void writeExif(DataOutputStream outputStream) throws IOException
 	{
+		calculateIfdSize();
+
 		writeStableData(outputStream);
 
 		LinkedList<Entry> ifd0 = exif.getIfd0();
@@ -276,7 +284,41 @@ public class JpegOutputSet {
 		if(thumbnail != null)
 			outputStream.write(thumbnail.getThumbnailData());
 	}
+
+	//Post: calculate the size of each IFD and set to associate data field
+	private void calculateIfdSize()
+	{
+		LinkedList<Entry> ifd0 = exif.getIfd0();
+		if(ifd0 == null)
+			ifd0Size = 0;
+		else
+			ifd0Size = getEntrySize(ifd0) + getEntryDataSize(ifd0);
+
+		LinkedList<Entry> subIfd = exif.getSubIfd();
+		if(subIfd == null)
+			subIfdSize = 0;
+		else
+			subIfdSize = getEntrySize(subIfd) + getEntryDataSize(subIfd);
+
+		LinkedList<Entry> ifd1 = exif.getIfd1();
+		if(ifd1 == null)
+			ifd1Size = 0;
+		else
+			ifd1Size = getEntrySize(ifd1) + getEntryDataSize(ifd1);
+
+		LinkedList<Entry> gps = exif.getGpsIfd();
+		if(gps == null)
+			gpsIfdSize = 0;
+		else
+			gpsIfdSize = getEntrySize(gps) + getEntryDataSize(gps);
 	
+		LinkedList<Entry> inter = exif.getInterIfd();
+		if(inter == null)
+			interIfdSize = 0;
+		else
+			interIfdSize = getEntrySize(inter) + getEntryDataSize(inter);
+	}
+
 	//Output: Write an entry using passed buffered output stream and interoperability data
 	private void writeInterIfd(DataOutputStream outputStream, LinkedList<Entry> interoperabilityIfd) throws IOException
 	{
@@ -297,31 +339,7 @@ public class JpegOutputSet {
 				//Just copy data if no external data
 				outputStream.write(e.getOffset());
 			else {
-				int offset = DATA_HEADER;
-
-				LinkedList<Entry> ifd0 = exif.getIfd0();
-				if(ifd0 != null) {
-					offset += getEntrySize(ifd0);
-					offset += getEntryDataSize(ifd0);
-				}
-
-				LinkedList<Entry> subIfd = exif.getSubIfd();
-				if(subIfd != null) {
-					offset += getEntrySize(subIfd);
-					offset += getEntryDataSize(subIfd);
-				}
-
-				LinkedList<Entry> ifd1 = exif.getIfd1();
-				if(ifd1 != null) {
-					offset += getEntrySize(ifd1);
-					offset += getEntryDataSize(ifd1);
-				}
-				
-				LinkedList<Entry> gpsIfd = exif.getGpsIfd();
-				if(gpsIfd != null) {
-					offset += getEntrySize(gpsIfd);
-					offset += getEntryDataSize(gpsIfd);
-				}
+				int offset = DATA_HEADER + ifd0Size + subIfdSize + ifd1Size + gpsIfdSize;
 				
 				offset += getEntrySize(interoperabilityIfd);
 
@@ -360,28 +378,9 @@ public class JpegOutputSet {
 				//Just copy data if no external data
 				outputStream.write(e.getOffset());
 			else {
-				int offset = DATA_HEADER;
+				int offset = DATA_HEADER + ifd0Size + subIfdSize + ifd1Size;
 
-				LinkedList<Entry> ifd0 = exif.getIfd0();
-				if(ifd0 != null) {
-					offset += getEntrySize(ifd0);
-					offset += getEntryDataSize(ifd0);
-				}
-
-				LinkedList<Entry> subIfd = exif.getSubIfd();
-				if(subIfd != null) {
-					offset += getEntrySize(subIfd);
-					offset += getEntryDataSize(subIfd);
-				}
-
-				LinkedList<Entry> ifd1 = exif.getIfd1();
-				if(ifd1 != null) {
-					offset += getEntrySize(ifd1);
-					offset += getEntryDataSize(ifd1);
-				}
-
-				if(gpsIfd != null)
-					offset += getEntrySize(gpsIfd);
+				offset += getEntrySize(gpsIfd);
 
 				offset += externalDataSize;
 
@@ -416,53 +415,15 @@ public class JpegOutputSet {
 			//write offset
 			if( ((tagNumber[0] & 0xFF) == 0x02 && (tagNumber[1] & 0xFF) == 0x01) ||
 				((tagNumber[0] & 0xFF) == 0x01 && (tagNumber[1] & 0xFF) == 0x11) ) { //write offset to thumbnail image
-				int offset = DATA_HEADER;
-
-				LinkedList<Entry> ifd0 = exif.getIfd0();
-				if(ifd0 != null) {
-					offset += getEntrySize(ifd0);
-					offset += getEntryDataSize(ifd0);
-				}
-
-				LinkedList<Entry> subIfd = exif.getSubIfd();
-				if(subIfd != null) {
-					offset += getEntrySize(subIfd);
-					offset += getEntryDataSize(subIfd);
-				}
-
-				offset += getEntrySize(ifd1);
-				offset += getEntryDataSize(ifd1);
-
-				LinkedList<Entry> gps = exif.getGpsIfd();
-				if(gps != null) {
-					offset += getEntrySize(gps);
-					offset += getEntryDataSize(gps);
-				}
 				
-				LinkedList<Entry> interoperabilityIfd = exif.getInterIfd();
-				if(interoperabilityIfd != null) {
-					offset += getEntrySize(interoperabilityIfd);
-					offset += getEntryDataSize(interoperabilityIfd);
-				}
+				int offset = DATA_HEADER + ifd0Size + subIfdSize + ifd1Size + gpsIfdSize + interIfdSize;
 
 				outputStream.writeInt(offset);
 			} else if( e.getComponentCount() * DATA_SIZE[e.getDataFormat()] <= 4 )
 				//Just copy data if no external data
 				outputStream.write(e.getOffset());
 			else {
-				int offset = DATA_HEADER;
-
-				LinkedList<Entry> ifd0 = exif.getIfd0();
-				if(ifd0 != null) {
-					offset += getEntrySize(ifd0);
-					offset += getEntryDataSize(ifd0);
-				}
-
-				LinkedList<Entry> subIfd = exif.getSubIfd();
-				if(subIfd != null) {
-					offset += getEntrySize(subIfd);
-					offset += getEntryDataSize(subIfd);
-				}
+				int offset = DATA_HEADER + ifd0Size + subIfdSize;
 
 				offset += getEntrySize(ifd1);
 
@@ -499,42 +460,14 @@ public class JpegOutputSet {
 			//write offset
 			if( (tagNumber[0] & 0xFF) == 0xA0 && (tagNumber[1] & 0xFF) == 0x05 ) { //write Interoperability offset
 				
-				int offset = DATA_HEADER;
-				
-				//calculate offset to interoperability offset
-				LinkedList<Entry> ifd0 = exif.getIfd0();
-				if( ifd0 != null ) {
-					offset += getEntrySize(ifd0);
-					offset += getEntryDataSize(ifd0);
-				}
-
-				offset += getEntrySize(subIfd);
-				offset += getEntryDataSize(subIfd);
-
-				LinkedList<Entry> ifd1 = exif.getIfd1();
-				if( ifd1 != null ) {
-					offset += getEntrySize(ifd1);
-					offset += getEntryDataSize(ifd1);
-				}
-				
-				LinkedList<Entry> gps = exif.getGpsIfd();
-				if( gps != null ) {
-					offset += getEntrySize(gps);
-					offset += getEntryDataSize(gps);
-				}
+				int offset = DATA_HEADER + ifd0Size + subIfdSize + ifd1Size + gpsIfdSize;
 				
 				outputStream.writeInt(offset);
 			} else if( e.getComponentCount() * DATA_SIZE[e.getDataFormat()] <= 4 )
 				//Just copy data if no external data
 				outputStream.write(e.getOffset());
 			else {
-				int offset = DATA_HEADER;
-
-				LinkedList<Entry> ifd0 = exif.getIfd0();
-				if(ifd0 != null) {
-					offset += getEntrySize(ifd0);
-					offset += getEntryDataSize(ifd0);
-				}
+				int offset = DATA_HEADER + ifd0Size;
 
 				offset += getEntrySize(subIfd);
 
@@ -574,22 +507,7 @@ public class JpegOutputSet {
 				int offset = DATA_HEADER + getEntrySize(ifd0) + getEntryDataSize(ifd0);
 				outputStream.writeInt(offset);
 			} else if( (tagNumber[0] & 0xFF) == 0x88 && (tagNumber[1] & 0xFF) == 0x25 ) { //write gpsIfd offset
-				int offset = DATA_HEADER;
-
-				offset += getEntrySize(ifd0);
-				offset += getEntryDataSize(ifd0);
-
-				LinkedList<Entry> subIfd = exif.getSubIfd();
-				if(subIfd != null) {
-					offset += getEntrySize(subIfd);
-					offset += getEntryDataSize(subIfd);
-				}
-
-				LinkedList<Entry> ifd1 = exif.getIfd1();
-				if(ifd1 != null) {
-					offset += getEntrySize(ifd1);
-					offset += getEntryDataSize(ifd1);
-				}
+				int offset = DATA_HEADER + ifd0Size + subIfdSize + ifd1Size;
 
 				outputStream.writeInt(offset);
 			} else { //general tag
@@ -618,24 +536,9 @@ public class JpegOutputSet {
 	//Return: offset to IFD 1 as an int
 	private int offsetToIfd1()
 	{
-		if(exif.getIfd1() != null) {
-			int offset = DATA_HEADER;
-
-			LinkedList<Entry> ifd0 = exif.getIfd0();
-			if(ifd0 != null) {	
-				offset += getEntrySize(ifd0);
-				offset += getEntryDataSize(ifd0);
-			}
-
-			LinkedList<Entry> subIfd = exif.getSubIfd();
-			if(subIfd != null) {
-				offset += getEntrySize(subIfd);
-				offset += getEntryDataSize(subIfd);
-			}
-
-			return offset;
-
-		} else
+		if(exif.getIfd1() != null)
+			return DATA_HEADER + ifd0Size + subIfdSize;
+		else
 			return 0;
 	}
 
@@ -689,8 +592,8 @@ public class JpegOutputSet {
 	//Output: Write an entry size using passed buffered output stream and ifd data
 	private void writeEntrySize(DataOutputStream outputStream, LinkedList<Entry> ifd) throws IOException
 	{
-		int entry_count = ifd.size();
-		outputStream.writeShort(entry_count);
+		int entryCount = ifd.size();
+		outputStream.writeShort(entryCount);
 	}
 
 	//Output: write data that is always the same for jpeg
@@ -738,37 +641,7 @@ public class JpegOutputSet {
 		//size of each part
 		final int EXIF_HEADER = 16;
 
-		int size = EXIF_HEADER;
-
-		LinkedList<Entry> ifd0 = exif.getIfd0();
-		if(ifd0 != null) {	
-			size += getEntrySize(ifd0);
-			size += getEntryDataSize(ifd0);
-		}
-
-		LinkedList<Entry> subIfd = exif.getSubIfd();
-		if(subIfd != null)	{
-			size += getEntrySize(subIfd);
-			size += getEntryDataSize(subIfd);
-		}
-
-		LinkedList<Entry> ifd1 = exif.getIfd1();
-		if(ifd1 != null){
-			size += getEntrySize(ifd1);
-			size += getEntryDataSize(ifd1);
-		}
-
-		LinkedList<Entry> gpsIfd = exif.getGpsIfd();
-		if(gpsIfd != null)	{
-			size += getEntrySize(gpsIfd);
-			size += getEntryDataSize(gpsIfd);
-		}
-		
-		LinkedList<Entry> interoperabilityIfd = exif.getInterIfd();
-		if(interoperabilityIfd != null)	{
-			size += getEntrySize(interoperabilityIfd);
-			size += getEntryDataSize(interoperabilityIfd);
-		}
+		int size = EXIF_HEADER + ifd0Size + subIfdSize + ifd1Size + gpsIfdSize + interIfdSize;
 
 		if(thumbnail != null)
 			size += thumbnail.getThumbnailData().length;

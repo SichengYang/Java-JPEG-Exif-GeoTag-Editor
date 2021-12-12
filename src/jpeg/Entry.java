@@ -131,6 +131,7 @@ public class Entry
 			} else
 				return (long)value == (long)(entry.getValue());
 		case 5: //unsigned rational
+		case 10: //signed rational
 			if(value.getClass().isArray() && entry.getValue().getClass().isArray()) {
 				int[] value1 = (int[]) value;
 				int[] value2 = (int[]) entry.getValue();
@@ -146,16 +147,6 @@ public class Entry
 			return Arrays.equals((byte[])value, (byte[])(entry.getValue()));
 		case 8: //signed short
 			return (short)value == (short)(entry.getValue());
-		case 10: //signed rational
-			if(value.getClass().isArray() && entry.getValue().getClass().isArray()) {
-				int[] value1 = (int[]) value;
-				int[] value2 = (int[]) entry.getValue();
-				return Arrays.equals(value1, value2);
-			} else {
-				int value1 = (int) value;
-				int value2 = (int) entry.getValue();
-				return value1 == value2;
-			}
 		case 11: //single float
 			return (float)value == (float)(entry.getValue());
 		case 12: //single double
