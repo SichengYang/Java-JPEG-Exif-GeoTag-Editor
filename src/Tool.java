@@ -9,7 +9,7 @@ import jpeg.*;
 	command type:
 	-m remove for remove geotag, update for update geotag, 
 	   verify for verify whether file is a jpeg, and print to print geotag (required)
-	-i name of input file or folder in assets folder (required)
+	-i name of input file, folder in assets folder, or wild card . (required)
 	-la latitude as a String (required when you select to update geotag)
 	-lo longitude as a String (required when you select to update geotag)
 	-help print help menu
@@ -224,7 +224,7 @@ public class Tool {
 	{
 		//Analyse input string
 		for(int position = 0; position < args.length; ) {
-			if(position + 1 >= args.length) {
+			if(!args[position].equals("-help") && position + 1 >= args.length) {
 				System.out.println("Missing argument after flag " + args[position]);
 				System.exit(0);
 			}
@@ -236,7 +236,7 @@ public class Tool {
 					break;
 				case "-i":
 					if(args[position + 1].equals(".")){
-						assetsFolder = new File("./assets/");;
+						assetsFolder = new File("./assets/");
 					} else {
 						File temp = new File("./assets/" + args[position + 1]);
 						if(temp.isFile())
@@ -301,7 +301,7 @@ public class Tool {
 	//Output: help menu printed on the screen
 	public static void printHelp(){
 		System.out.println("-m remove for remove geotag, update for update geotag");
-		System.out.println("-i name of input file or folder in assets folder");
+		System.out.println("-i name of input file or folder in assets folder, or wild card .");
 		System.out.println("-o output file name (only for single file processing)");
 		System.out.println("-la latitude as a String");
 		System.out.println("-lo longitude as a String");
