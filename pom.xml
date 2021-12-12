@@ -1,0 +1,7 @@
+<distributionManagement>
+   <repository>
+     <id>github</id>
+     <name>GitHub Sicheng Yang Apache Maven Packages</name>
+     <url>https://maven.pkg.github.com/SichengYang/Java-JPEG-GeoTag-Editor</url>
+   </repository>
+</distributionManagement>
