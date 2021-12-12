@@ -32,7 +32,7 @@ command type:
 -m remove for remove geotag, update for update geotag, 
 	 verify for verify whether file is a jpeg, and print to print geotag (required)
  
--i name of input file or folder in assets folder (required)
+-i name of input file or folder in assets folder. It could also be "." means process all images under assets (required)
   
 -la latitude as a String (required when you select to update geotag)
   
