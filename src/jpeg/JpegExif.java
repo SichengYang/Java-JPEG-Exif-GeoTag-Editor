@@ -26,6 +26,14 @@ public class JpegExif {
 	private int thumbnailLength = 0;
 	private int imageWidth = 0;
 	private int imageHeight = 0;
+	private String latitudeRef;
+	private String longitudeRef;
+	private Integer latitudeDegree = null;
+	private Integer longitudeDegree = null;
+	private Integer latitudeMinute = null;
+	private Integer longitudeMinute = null;
+	private Double latitudeSecond = null;
+	private Double longitudeSecond = null;
 	
 	private LinkedList<Entry> gpsEntry;
 	private LinkedList<Entry> ifd0;
@@ -109,6 +117,7 @@ public class JpegExif {
 		{
 			position = gpsOffset;
 			gpsEntry = new LinkedList<>( Arrays.asList(readIfd(exif)) );
+			analyzeGps();
 		}
 		
 		//read interoperability IFD
@@ -213,6 +222,38 @@ public class JpegExif {
 	public LinkedList<Entry> getIfd1()
 	{
 		return ifd1;
+	}
+	
+	public String getLatitudeRef() {
+		return latitudeRef;
+	}
+
+	public String getLongitudeRef() {
+		return longitudeRef;
+	}
+
+	public Integer getLatitudeDegree() {
+		return latitudeDegree;
+	}
+
+	public Integer getLongitudeDegree() {
+		return longitudeDegree;
+	}
+
+	public Integer getLatitudeMinute() {
+		return latitudeMinute;
+	}
+
+	public Integer getLongitudeMinute() {
+		return longitudeMinute;
+	}
+
+	public Double getLatitudeSecond() {
+		return latitudeSecond;
+	}
+
+	public Double getLongitudeSecond() {
+		return longitudeSecond;
 	}
 
 	//Return: a collection of Entry after reading a IFD
@@ -542,6 +583,29 @@ public class JpegExif {
 				imageHeight = getObjectValue(e.getValue());
 			} else if ( (tagNumber[0] & 0xFF) == 0xa0 && (tagNumber[1] & 0xFF) == 0x05 ) {
 				interoperabilityOffset = getObjectValue(e.getValue());
+			}
+		}
+	}
+
+	//Post: analyze gps IFD and set latitude and longitude
+	private void analyzeGps()
+	{
+		for (Entry e : gpsEntry){
+			byte[] tagNumber = e.getTagNumber();
+			if( (tagNumber[0] & 0xFF) == 0x00 && (tagNumber[1] & 0xFF) == 0x01 )
+				latitudeRef = (String) e.getValue();
+			else if( (tagNumber[0] & 0xFF) == 0x00 && (tagNumber[1] & 0xFF) == 0x02 ){
+				int[] latitudeData = (int[]) e.getValue();
+				latitudeDegree = latitudeData[0] / latitudeData[1];
+				latitudeMinute = latitudeData[2] / latitudeData[3];
+				latitudeSecond = (double)latitudeData[4] / latitudeData[5];
+			} else if( (tagNumber[0] & 0xFF) == 0x00 && (tagNumber[1] & 0xFF) == 0x03 )
+				longitudeRef = (String) e.getValue();
+			else if( (tagNumber[0] & 0xFF) == 0x00 && (tagNumber[1] & 0xFF) == 0x04 ){
+				int[] longitudeData = (int[]) e.getValue();
+				longitudeDegree = longitudeData[0] / longitudeData[1];
+				longitudeMinute = longitudeData[2] / longitudeData[3];
+				longitudeSecond = (double)longitudeData[4] / longitudeData[5];
 			}
 		}
 	}

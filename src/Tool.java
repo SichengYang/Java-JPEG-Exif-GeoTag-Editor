@@ -40,8 +40,8 @@ public class Tool {
 	null pointer is used here to determine whether 
 	latitude and longitude are valid
 	*/
-	private static Double latitude = 0.0;
-	private static Double longitude = 0.0;
+	private static Double latitude = null;
+	private static Double longitude = null;
 
 	//Pre: this is a command line tool for jpeg processing
 	//Input: user input a command string
@@ -98,11 +98,11 @@ public class Tool {
 				}
 				break;
 			case "update":
-				if(latitude == 0) {
+				if(latitude == null) {
 					System.out.println("Latitude information missing");
 					break;
 				} 
-				if(longitude == 0) {
+				if(longitude == null) {
 					System.out.println("Longitude information missing");
 					break;
 				}
@@ -144,17 +144,17 @@ public class Tool {
 				}
 				JpegOutputSet outputSet = new JpegOutputSet(jpeg);
 				File result = new File("./assets/results/" + jpegFile.getName());
-				if(outputSet.updateGeoTag(result, latitude, longitude))
-					System.out.printf("Geotag in %s has been update \n", jpegFile.getName());
+				if(outputSet.removeGeoTag(result))
+					System.out.printf("Geotag in %s has been removed \n", jpegFile.getName());
 				else
-					System.out.printf("Failed to update geotag in %s \n", jpegFile.getName());
+					System.out.printf("Failed to remove geotag in %s \n", jpegFile.getName());
 				break;
 			case "update":
-				if(latitude == 0) {
+				if(latitude == null) {
 					System.out.println("Latitude information missing");
 					break;
 				} 
-				if(longitude == 0) {
+				if(longitude == null) {
 					System.out.println("Longitude information missing");
 					break;
 				}
@@ -175,12 +175,22 @@ public class Tool {
 			case "print":
 				try{
 					jpeg = new Jpeg(jpegFile);
-					if(jpeg.exif != null)
-						jpeg.exif.print();
+					if(jpeg.exif != null && jpeg.exif.getLatitudeRef() != null && jpeg.exif.getLongitudeRef() != null){
+						System.out.printf("Latitude: %d %d %.2f %s %n", 
+										  jpeg.exif.getLatitudeDegree(), 
+										  jpeg.exif.getLatitudeMinute(), 
+										  jpeg.exif.getLatitudeSecond(), 
+										  jpeg.exif.getLatitudeRef());
+						System.out.printf("Longitude: %d %d %.2f %s %n", 
+										  jpeg.exif.getLongitudeDegree(), 
+										  jpeg.exif.getLongitudeMinute(), 
+										  jpeg.exif.getLongitudeSecond(), 
+										  jpeg.exif.getLongitudeRef());
+					}
 					else
 						System.out.println("There is not geotag in jpeg");
 				} catch (Exception e){
-
+					System.err.println("Error on read jpeg");
 				}
 				break;
 			case "verify":
