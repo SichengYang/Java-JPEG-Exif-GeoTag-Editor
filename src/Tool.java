@@ -176,12 +176,12 @@ public class Tool {
 				try{
 					jpeg = new Jpeg(jpegFile);
 					if(jpeg.exif != null && jpeg.exif.getLatitudeRef() != null && jpeg.exif.getLongitudeRef() != null){
-						System.out.printf("Latitude: %d %d %.2f %s %n", 
+						System.out.printf("Latitude: %dº%d'%.2f\" %s %n", 
 										  jpeg.exif.getLatitudeDegree(), 
 										  jpeg.exif.getLatitudeMinute(), 
 										  jpeg.exif.getLatitudeSecond(), 
 										  jpeg.exif.getLatitudeRef());
-						System.out.printf("Longitude: %d %d %.2f %s %n", 
+						System.out.printf("Longitude: %dº%d'%.2f\" %s %n", 
 										  jpeg.exif.getLongitudeDegree(), 
 										  jpeg.exif.getLongitudeMinute(), 
 										  jpeg.exif.getLongitudeSecond(), 
@@ -244,7 +244,7 @@ public class Tool {
 						else if(temp.isDirectory())
 							assetsFolder = temp;
 						else {
-							System.out.println("Error on analyse file type");
+							System.out.println("Error on analyse file, please check the file name.");
 							System.exit(0);
 						}
 					}
