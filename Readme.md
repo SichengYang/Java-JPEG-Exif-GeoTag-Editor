@@ -14,9 +14,68 @@ git clone https://github.com/SichengYang/Java-Exif-Editor.git
 ```
 ## Compile Instruction
 ```
-javac -cp .:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar *.java */*.java
+javac -d bin -cp .:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar *.java */*.java
 ```
+## Running Instruction
+- Run App or Tool
+```
+java -cp bin App
+java -cp bin Tool <command>
+```
+- Run JUnit Test
+```
+java -cp .:bin:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar tests.<a test runner>
+```
+## Tool Command Instruction
+command type:
 
+-m remove for remove geotag, update for update geotag, 
+	 verify for verify whether file is a jpeg, and print to print geotag (required)
+ 
+-i name of input file or folder in assets folder (required)
+  
+-la latitude as a String (required when you select to update geotag)
+  
+-lo longitude as a String (required when you select to update geotag)
+  
+-help print help menu
+	
+**Note: flag order does not matter**
+
+- remove geotag command sample:
+```
+-m remove -i <file path under assets>
+```
+- update geotag command sample:
+```
+-m update -i <file path under assets> -la <latitude> -lo <longitude>
+```
+- print geotag command sample:
+```
+-m print -i <file path under assets>
+```
+- verify jpeg command sample:
+```
+-m verify -i <file path under assets>
+```
+- print all tag command sample:
+```
+-m tag -i <file path under assets>
+```
+- print help menu:
+```
+-help
+```
+## Geotag Support Format
+- 100 30 20.99 N
+- 100 40.99 S
+- 100.88 W
+- 100 30 20.99  (you can type in positive or negative to represent the direction)
+- -100 -30 -20.99
+- 100 40.99
+- -100 -40.99
+- 100.88
+- -100.88
 ## License
 - It is licensed to <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons Zero v1.0 Universal</a>.
 
