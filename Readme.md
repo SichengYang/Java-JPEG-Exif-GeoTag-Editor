@@ -14,7 +14,7 @@ git clone https://github.com/SichengYang/Java-Exif-Editor.git
 ```
 ## Compile Instruction
 ```
-javac -d bin -cp .:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar *.java */*.java
+javac -d bin -cp .:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar */*.java */*/*.java
 ```
 ## Running Instruction
 - Run App or Tool
