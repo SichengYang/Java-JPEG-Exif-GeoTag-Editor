@@ -2,7 +2,7 @@
 
 ## Description
 - This is a Java library that can let user scan jpeg/jpg exif, report all tags, and change or remove geotag.
-- This project offers App.java which can process all images in assets and a command line tool. For the instruction, please see the the content below.
+- This project offers App.java which can process all images in assets and a command line tool. For the instruction, please see the content below.
 - Project that use this library: https://github.com/tahaafzal5/AugieGeoTag
 
 ## Functions
