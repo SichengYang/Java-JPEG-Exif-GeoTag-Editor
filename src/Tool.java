@@ -222,16 +222,23 @@ public class Tool {
 	//Post: Analyse input and set associate value to global variables
 	public static void analyseInput(String[] args)
 	{
-		//Analyse input string
-		for(int position = 0; position < args.length; ) {
-			if(!args[position].equals("-help") && position + 1 >= args.length) {
+		//if user want help, print help menu.
+		if(args[0].equals("-help")){
+			printHelp();
+			System.exit(0);
+		}
+
+		//if the first flag is not help, parse input string.
+		int position = 0;
+		while( position < args.length ) {
+			if(position + 1 >= args.length) {
 				System.out.println("Missing argument after flag " + args[position]);
 				System.exit(0);
 			}
 			switch(args[position])
 			{
 				case "-m":
-					mode = args[position + 1]; 
+					mode = args[position + 1];
 					position += 2;
 					break;
 				case "-i":
@@ -288,9 +295,6 @@ public class Tool {
 					//move to next section 
 					position += 1;
 					break;
-				case "-help":
-					printHelp();
-					System.exit(0);
 				default:
 					System.out.println("Error on command type " + args[position]);
 					System.exit(0);
