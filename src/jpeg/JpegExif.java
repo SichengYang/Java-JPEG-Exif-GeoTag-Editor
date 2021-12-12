@@ -87,13 +87,13 @@ public class JpegExif {
 
 		//read each IFD and find GPS IFD. 
 		//read IFD0
-		ifd0 = new LinkedList<Entry>( Arrays.asList(readIfd(exif)) );
+		ifd0 = new LinkedList<>( Arrays.asList(readIfd(exif)) );
 
 		//read sub IFD
 		if( subOffset != 0 ) 
 		{
 			position = subOffset;
-			subIfd = new LinkedList<Entry>( Arrays.asList(readIfd(exif)) );
+			subIfd = new LinkedList<>( Arrays.asList(readIfd(exif)) );
 			analyzeSubIfd();
 		}
 
@@ -101,21 +101,21 @@ public class JpegExif {
 		if( ifd1Offset != 0 )
 		{
 			position = ifd1Offset;
-			ifd1 = new LinkedList<Entry>( Arrays.asList(readIfd(exif)) );
+			ifd1 = new LinkedList<>( Arrays.asList(readIfd(exif)) );
 		}
 
 		//read GPS IFD
 		if( gpsOffset != 0 )
 		{
 			position = gpsOffset;
-			gpsEntry = new LinkedList<Entry>( Arrays.asList(readIfd(exif)) );
+			gpsEntry = new LinkedList<>( Arrays.asList(readIfd(exif)) );
 		}
 		
 		//read interoperability IFD
 		if(interoperabilityOffset != 0)
 		{
 			position = interoperabilityOffset;
-			interoperabilityIfd = new LinkedList<Entry>( Arrays.asList(readIfd(exif)) );
+			interoperabilityIfd = new LinkedList<>( Arrays.asList(readIfd(exif)) );
 		}
 
 		analyzeThumbnail();
