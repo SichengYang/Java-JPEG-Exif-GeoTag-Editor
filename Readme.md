@@ -81,6 +81,7 @@ command type:
 
 ## Sample Usage
 - <a href="https://github.com/SichengYang/Java-JPEG-GeoTag-Editor/blob/main/src/App.java">App.java under src</a>
+- - <a href="https://github.com/SichengYang/Java-JPEG-GeoTag-Editor/blob/main/src/Tool.java">Tool.java under src</a>
 
 ## Import Guide
 - import jpeg.*;
