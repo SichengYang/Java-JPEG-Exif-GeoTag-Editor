@@ -135,8 +135,4 @@ public class Jpeg
 
 		return content;		
 	}
-
-    public String getName() {
-        return null;
-    }
 }
