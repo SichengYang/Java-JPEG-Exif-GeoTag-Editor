@@ -16,19 +16,24 @@ git clone https://github.com/SichengYang/Java-Exif-Editor.git
 ```
 ## Compile Instruction
 ```
-javac -d bin -cp .:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar */*.java */*/*.java
+javac -d bin -cp .:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar --module-path <your javafx library path> --add-modules javafx.controls */*.java */*/*.java
 ```
 ## Running Instruction
-- Run App or Tool
+- Run App
 ```
 java -cp bin App
 ```
+- Run Tool
 ```
 java -cp bin Tool <command>
 ```
 - Run JUnit Test
 ```
 java -cp .:bin:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar tests.<a test runner>
+```
+- Run JavaFX Progrma Editor
+```
+java -cp .:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar:bin --module-path <your javafx library path> --add-modules javafx.controls Editor
 ```
 ## Tool Command Instruction
 command type:
