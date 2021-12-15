@@ -33,7 +33,7 @@ java -cp .:bin:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar tests.<a test 
 ```
 - Run JavaFX Progrma Editor
 ```
-java -cp .:./lib/hamcrest-core-1.3.jar:./lib/junit-4.13.2.jar:bin --module-path <your javafx library path> --add-modules javafx.controls Editor
+java -cp bin --module-path <your javafx library path> --add-modules javafx.controls Editor
 ```
 ## Tool Command Instruction
 command type:
