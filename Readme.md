@@ -12,7 +12,7 @@
 
 ## Download
 ```
-git clone https://github.com/SichengYang/Java-Exif-Editor.git
+git clone https://github.com/SichengYang/Java-JPEG-Exif-GeoTag-Editor.git
 ```
 ## Compile Instruction
 ```
