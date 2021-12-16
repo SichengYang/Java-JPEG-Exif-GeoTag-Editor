@@ -1,4 +1,4 @@
-<h1 align="center" style="border-bottom: none">Java JPEG GeoTag Editor</h1>
+<h1 align="center" style="border-bottom: none">Java JPEG Exif GeoTag Editor</h1>
 
 ## Description
 - This is a Java library that can let user scan jpeg/jpg exif, report all tags, and change or remove geotag.
